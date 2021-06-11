@@ -3,55 +3,27 @@
     <el-form
       ref="form"
       label-width="100px"
-      :model="form"
+      :model="topicForm"
       class="el_form"
-      label-position="right"
-    >
-      <el-form-item label="课题名称">
+      label-position="right">
+      <el-form-item label="课题名称：">
         <el-col :span="8">
-          <el-input v-model="form.topic"> </el-input>
+          <el-input v-model="topicForm.topicName" placeholder="名称"></el-input>
         </el-col>
       </el-form-item>
-      <el-form-item label="系部">
+      <el-form-item label="系部：">
         <el-col :span="4">
-          <el-select v-model="form.department">
-            <el-option label="电信系" value="电信系"></el-option>
-          </el-select>
+          <span>{{user.institute_name}}</span>
         </el-col>
       </el-form-item>
-      <el-form-item label="专业">
-        <el-col :span="6">
-          <el-input v-model="form.major"></el-input>
-        </el-col>
-      </el-form-item>
-
-      <el-form-item label="课题简介">
+      <el-form-item label="课题简介：">
         <el-col :span="12">
           <el-input
-            v-model="form.introduce"
+            v-model="topicForm.topicDesc"
             type="textarea"
             :rows="3"
-            placeholder="简单介绍使用到的技术或者课题特色等"
-          ></el-input>
+            placeholder="简单介绍使用到的技术或者课题特色等"></el-input>
         </el-col>
-      </el-form-item>
-
-      <el-form-item label="详细内容描述">
-        <div id="div1">
-          <el-col :span="12">
-            <el-input v-model="form.title" placeholder="板块标题"></el-input>
-          </el-col>
-          <br />
-          <br />
-          <el-col :span="12">
-            <el-input
-              type="textarea"
-              v-model="form.text"
-              :rows="8"
-              placeholder="板块内容  "
-            ></el-input>
-          </el-col>
-        </div>
       </el-form-item>
       <el-form-item class="button">
         <el-button type="primary" @click="onSubmit">立即创建</el-button>
@@ -61,41 +33,87 @@
 </template>
 
 <script>
-export default {
-  name: "newlyAdded",
-  data() {
-    return {
-      labelPosition: "top",
-      form: {
-        topic: "毕业设计选题系统",
-        department: "",
-        major: "计算机技术应用",
-        text: "",
-        title: "",
-        introduce: "",
-      },
-    };
-  },
-  methods: {
-    onSubmit() {
-      console.log(111);
-      // console.log(this.form);
+  import {request} from "../../network/request";
+
+  export default {
+    name: "newlyAdded",
+    data() {
+      return {
+        labelPosition: "top",
+        topicForm: {
+          topicName: '',
+          topicDesc: '',
+          teacherId: ''
+        }
+      };
     },
-  },
-};
+    created() {
+      // 获取当前登录对象
+      this.user = this.$store.getters.user
+      this.topicForm.teacherId = this.user.teacher_no
+    },
+    methods: {
+      onSubmit() {
+        // 基础判断
+        if (this.topicForm.topicName === '' || this.topicForm.topicDesc === '') {
+          return this.$message({
+            type: 'warning',
+            message: '内容不能为空哟.'
+          })
+        }
+        // 新增课题
+        request({
+          url: "teacher/add/topic",
+          method: "post",
+          data: this.topicForm,
+        }).then((res) => {
+          console.log(res)
+          const message = res.message
+          if(res.state === 1) {
+            this.$message({
+              type: 'success',
+              message
+            })
+            // 清空表单
+            this.emptyForm()
+          }
+        }).catch(err => {
+          this.$message({
+            type: 'success',
+            message: err.message
+          })
+        })
+      },
+      // 清空表单
+      emptyForm() {
+        this.topicForm.topicName = ''
+        this.topicForm.topicDesc = ''
+      }
+    }
+  }
 </script>
 
 <style scoped>
-.newlyAdded {
-  width: 100%;
-  height: calc(100vh - 100px);
-  overflow: auto;
-}
-.el_form {
-  margin: 20px 0 0 30px;
-  margin-bottom: 100px;
-}
-.button {
-  float: left;
-}
+  .newlyAdded {
+    width: 100%;
+    height: calc(100vh - 100px);
+    overflow: auto;
+  }
+
+  .el_form {
+    margin: 20px 0 0 30px;
+    margin-bottom: 100px;
+  }
+
+  .button {
+    float: left;
+  }
+
+  .upload-demo {
+    text-align: center;
+  }
+
+  .upload_button {
+    margin-top: 10px;
+  }
 </style>

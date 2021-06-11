@@ -5,30 +5,39 @@
         <el-col>
           <el-menu
             style="border: 0px"
-            :default-active="$route.path"
+            :default-active="defaultPath"
             router
             class="el-menu-vertical-demo"
             background-color="#545c64"
             text-color="#fff"
-            active-text-color="#ffd04b"
-          >
-            <el-menu-item index="/home/studenthome/instructor" @click="instructor">
-              <!-- <template slot="title"> -->
+            active-text-color="#ffd04b">
+            <el-menu-item index="/home/studentHome">
+              <i class="el-icon-location"></i>
+              <span slot="title">首页</span>
+            </el-menu-item>
+            <el-menu-item
+              index="/home/studentHome/instructor"
+              :disabled="noCheck"
+              ref="noCheck">
               <i class="el-icon-location"></i>
               <span slot="title">课题中心</span>
-              <!-- </template>
-              <el-menu-item index="1-1">吕英华老师</el-menu-item>
-              <el-menu-item index="1-2">陈彬老师</el-menu-item> -->
             </el-menu-item>
-            <el-menu-item index="/home/studenthome/readyContent" @click="readyContent">
+            <el-menu-item
+              index="/home/studentHome/readyContent"
+              :disabled="noCheck"
+              ref="noCheck">
               <i class="el-icon-menu"></i>
               <span slot="title">我的预选</span>
             </el-menu-item>
-            <el-menu-item index="3" @click="personalCenter" disabled>
+            <el-menu-item
+              index="/home/studentHome/myTopic"
+              :disabled="check"
+              ref="check"
+              class="aaaa">
               <i class="el-icon-document"></i>
               <span slot="title">我的课题</span>
             </el-menu-item>
-            <el-menu-item index="/home/studenthome/personalCenter" @click="personalCenter">
+            <el-menu-item index="/home/studentHome/personalCenter">
               <i class="el-icon-document"></i>
               <span slot="title">个人中心</span>
             </el-menu-item>
@@ -37,22 +46,23 @@
       </el-aside>
       <el-container style="height: 100vh">
         <el-header>
-          <div class="headImg" @click="aaa">
-            <span style="margin-right: 20px">{{ userName }}</span>
+          <div class="headImg">
+            <span style="margin-right: 20px">{{ user.student_name }}</span>
             <el-dropdown>
               <span class="el-dropdown-link">
-                <img src="../../assets/login.jpg" />
+<!--                <img v-if="user.userIcon != null" :src='user.userIcon'>-->
+                <img src="../../assets/login.jpg"/>
               </span>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item @click.native="modify">
                   个人资料
                 </el-dropdown-item>
-                <el-dropdown-item divided @click.native="changeMima"
-                  >修改密码</el-dropdown-item
-                >
-                <el-dropdown-item divided @click.native="exit"
-                  >退出登录</el-dropdown-item
-                >
+                <el-dropdown-item divided @click.native="changemm">
+                  修改密码
+                </el-dropdown-item>
+                <el-dropdown-item divided @click.native="exit">
+                  退出登录
+                </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
           </div>
@@ -71,113 +81,99 @@
 </template>
 
 <script>
-// import personalCenter from "./personalCenter.vue"
+  // import personalCenter from "./personalCenter.vue"
 
-export default {
-  name: "studentHome",
-  data() {
-    return {
-      userName: "vic",
-      headImgSrc: "require(../../assets/login.jpg)",
-      defaultActive: "/home/studenthome/instructor"
-    };
-  },
-  // beforeRouteEnter(to, form, next) {
-  //   if (to.path != "/instructor") {
-  //     // var p = sessionStorage.getItem("route");
-  //     // next(p.path);
-  //   }else{
-  //     next("/instructor")
-  //   }
-  //   next();
-  // },
-  mounted() {
-    window.addEventListener("beforeunload", this.beforeunloadHandler, false);
-  },
-  // 获取当前的子路由路径
-  // 在stuhome刷新之前把当前路由存到session中
-  // (){
-  //   var to = JSON.parse(sessionStorage.getItem("route"))
-  //   console.log(to.route);
-  // this.$router.replace("/home/studenthome/"+to)
-  // },
-  created() {
-    this.userName = this.$store.state.name;
-    // console.log(this.$router.options.routes[0].children[0].children[this.token])
-    // console.log(this.$store.state);
-    this.$router.replace(this.$store.state.stuhomeState);
-  },
-  methods: {
-    beforeunloadHandler(e) {
-      var ob = this.$router.options.routes[0].children[0].children[this.token];
-      window.sessionStorage.setItem("route", ob);
-      e.returnValue = "确认刷新？";
+  export default {
+    name: "stuHome",
+    data() {
+      return {
+        userName: "",
+        headImgSrc: "require(../../assets/login.jpg)",
+        defaultActive: "/home/studenthome/instructor",
+        noCheck: false,
+        check: true,
+        defaultPath: '/home/studentHome',
+        user: null
+      };
     },
-    personalCenter() {
-      this.$store.commit("changeState", ["/home/studenthome/personalCenter",4]);
-      this.$router.replace("/home/studenthome/personalCenter");
+    inject: ["reload"], // 引入方法
+    mounted() {
+      this.reload();
     },
-    readyContent() {
-      this.$store.commit("changeState", ["/home/studenthome/readyContent", 2]);
-      this.$router.replace("/home/studenthome/readyContent");
+    created() {
+      this.userName = this.$store.state.userForm.student_name
+      this.user = this.$store.getters.user
+      console.log(this.user)
+      this.reload()
+      // this.cancelAttr()
+      this.defaultPath = this.$route.path
     },
-    instructor(index) {
-      this.$store.commit("changeState", ["/home/studenthome/instructor", 1]);
-      this.$router.replace("/home/studenthome/instructor");
-    },
-    aaa() {
-      // console.log(1112);
-    },
-    exit() {
-      // console.log(555);      
-      this.$store.commit("changeState", [""]);
-      this.$notify({
-        title: "消息",
-        message: "退出成功",
-        type: "success",
-      });
-      this.$router.replace("/");
-    },
-    modify() {
-      this.personalCenter();
-    },
-    changeMima() {
-      console.log(1);
-    },
-  },
-};
+    methods: {
+      cancelAttr() {
+        var c = this.$store.state.check
+        if (c != true) {
+          this.noCheck = true
+          this.check = !this.check
+        }
+      },
+      exit() {
+        window.localStorage.clear();
+        window.sessionStorage.clear();
+        this.$store.dispatch('resetVuex')
+        this.reload();
+        this.$notify({
+          title: "消息",
+          message: "退出成功",
+          type: "success",
+        });
+        this.$router.replace("/");
+      },
+      modify() {
+        this.personalCenter();
+      },
+      changemm() {
+        // console.log(1)
+        this.$router.push("/register");
+      },
+    }
+  };
 </script>
 
 <style scoped>
-.studentHome,
-.el-container {
-  height: 100%;
-}
-.el-aside {
-  height: 100vh;
-  background: #545c64;
-}
-.el-header {
-  border-bottom: 2px solid #545c64;
-  display: flex;
-  align-items: center;
-  flex-direction: row-reverse;
-}
-.el-header .headImg img {
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  border: 1px solid #545c64;
-}
-.el-footer {
-  width: 100%;
-  background: black;
-  color: #fff;
-  position: fixed;
-  bottom: 0;
-}
-.el-footer h6 {
-  line-height: 40px;
-  text-align: center;
-}
+  .studentHome,
+  .el-container {
+    height: 100%;
+  }
+
+  .el-aside {
+    height: 100vh;
+    background: #545c64;
+  }
+
+  .el-header {
+    border-bottom: 2px solid #545c64;
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
+  }
+
+  .el-header .headImg img {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    border: 1px solid #545c64;
+  }
+
+  .el-footer {
+    width: 100%;
+    background: black;
+    color: #fff;
+    position: fixed;
+    bottom: 0;
+  }
+
+  .el-footer h6 {
+    line-height: 40px;
+    text-align: center;
+  }
 </style>

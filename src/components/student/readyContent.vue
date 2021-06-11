@@ -5,8 +5,7 @@
         :data="tableData"
         style="width: 100%"
         stripe
-        ref="li"
-      >
+        ref="li">
         <el-table-column
           label="序号"
           width="120"
@@ -19,7 +18,7 @@
             <span style="margin-left: 10px">{{ scope.row.date }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="课题" width="300">
+        <el-table-column label="课题名称" width="300">
           <template slot-scope="scope">
             <el-popover trigger="hover" placement="top">
               <p>指导老师: {{ scope.row.teacher_name }}</p>
@@ -34,9 +33,8 @@
             <el-button
               size="mini"
               type="danger"
-              @click="handleDelete(scope.$index, scope.row, scope.row.title_no)"
-              >取消预选</el-button
-            >
+              @click="handleDelete(scope.$index, scope.row, scope.row.title_no)">取消预选
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -45,69 +43,77 @@
 </template>
 
 <script>
-import { request } from "../../network/request";
+  import {request} from "../../network/request";
 
-export default {
-  name: "readContent",
-  data() {
-    return {
-      tableData: [
-        {
-          date: "2016-05-06",
-          subject: "毕业设计选题系统",
-          teacher: "陈彬",
-        },
-      ],
-    };
-  },
-  beforeCreate() {
-    var studentId = this.$store.state.id;
-    request({
-      url: "student/already",
-      params: {
-        studentId: studentId,
-      },
-    }).then((res) => {
-      // console.log(res);
-      if (res.state == 1) {
-        this.tableData = res.data;
-        // console.log(this.tableData);
+  export default {
+    name: "readContent",
+    data() {
+      return {
+        tableData: [],
+        user: null // 登录用户对象
+      };
+    },
+    created() {
+      const user = this.$store.getters.user
+      if(user !== null) {
+        this.user = user
+        this.getAlreadySelectTopic()
       }
-    });
-  },
-  methods: {
-    handleDelete(index, row, id) {
-      var stu = this.$store.state.id;
-      request({
-        url: "student/back",
-        method: "post",
-        params: {
-          topicId: id,
-          studentId: 2019101044
-        },
-      }).then((res) => {
-        if (res.state == 1) {
-          this.tableData.splice(index, 1);
-        }
-      });
     },
-    indexMethod(index) {
-      return (index += 1);
+    methods: {
+      // 获取已经预选的数据
+      getAlreadySelectTopic() {
+        request({
+          url: "student/already",
+          params: {
+            studentId: this.user.student_no,
+          },
+        }).then((res) => {
+          console.log(res)
+          if ((res.state == 1)) {
+            this.tableData = res.data;
+          }
+        })
+      },
+      handleDelete(index, row, id) {
+        // var stu = this.$store.state.studentId;
+        request({
+          url: "student/back",
+          method: "post",
+          params: {
+            topicId: id,
+            studentId: this.user.student_no
+          },
+        }).then((res) => {
+          console.log(res)
+          if (res.state == 1) {
+            this.tableData.splice(index, 1);
+            this.$message({
+              message: res.message,
+              type: 'success'
+            })
+          }
+        });
+      },
+      indexMethod(index) {
+        return (index += 1);
+      },
     },
-  },
-};
+  };
 </script>
 
 <style scoped>
-.content {
-  width: 100%;
-  height: calc(100vh - 100px);
-  overflow: hidden;
-}
-.content p {
-  color: black;
-}
-.el-table::before,.el-table__fixed-right::before,.el-table__fixed::before{
-  height: 0;
-}
+  .content {
+    width: 100%;
+    height: calc(100vh - 100px);
+    overflow: hidden;
+  }
+
+  .content p {
+    color: black;
+  }
+
+  .el-table::before, .el-table__fixed-right::before, .el-table__fixed::before {
+    height: 0;
+  }
 </style>

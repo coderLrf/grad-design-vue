@@ -1,18 +1,15 @@
 <template>
   <div class="instructor">
     <ul class="ul">
-      <li class="list_li" v-for="(item, key) in list" :key="key" ref="li">
+      <li class="list_li" v-for="(item, key) in admissionList" :key="key" ref="li">
         <div class="container">
           <div class="select">
-            <p>题目：{{ item.title_name }}</p>
+            <p>题目id：{{item.title_no}}</p>
+            <p>题目名称：{{ item.title_name }}</p>
             <p>指导老师：{{ item.teacher_name }}</p>
             <span>课题介绍：{{ item.title_desc }}</span>
           </div>
-          <div
-            class="loading-btn"
-            @click="readySelect(key, item.title_no)"
-            ref="div"
-          >
+          <div class="loading-btn" @click="readySelect(item.title_no)" ref="div">
             <button><span ref="span">预选</span></button>
           </div>
         </div>
@@ -30,69 +27,62 @@ export default {
   data() {
     return {
       count: 0,
-      list: [
-        { topicName: "毕业设计选题系统", teacherName: "陈彬" },
-        { topicName: "电商平台的web前端设计与实现", teacherName: "陈彬" },
-        { topicName: "网站UI界面设计", teacherName: "陈彬" },
-        { topicName: "小型数据库系统设计(mysql)", teacherName: "陈彬" },
-        { topicName: "某个旅游景点的网站设计", teacherName: "陈彬" },
-        { topicName: "电子商务类网站制作", teacherName: "陈彬" },
-        { topicName: "智能手机APP-UI界面设计", teacherName: "陈彬" },
-        { topicName: "H5移动融鼓某体制作", teacherName: "陈彬" },
-        { topicName: "某(酒店)名宿的网站设计", teacherName: "陈彬" },
-        { topicName: "个人网站制作", teacherName: "陈彬" },
-        { topicName: "聊天室系统", teacherName: "陈彬" },
-        { topicName: "个人博客系统", teacherName: "陈彬" },
-        { topicName: "说一句我不走了", teacherName: "陈彬" },
-      ],
+      admissionList: null,
+      user: null
     };
   },
-  beforeCreate() {
-    var studentId = this.$store.state.id;
-    // console.log(typeof studentId);
-    request({
-      url: "student/admission",
-      params: {
-        studentId: studentId,
-      },
-    }).then((res) => {
-      // console.log(res);
-      if ((res.state = 1)) {
-        this.list = res.data;
-      }
-    });
+  created() {
+    const user = this.$store.getters.user
+    if(user !== null) {
+      this.user = user
+      this.getAdmissionList()
+    }
   },
   methods: {
-    load() {
-      this.count += 2;
+    // 获取可以预选数据
+    getAdmissionList() {
+      request({
+        url: "student/admission",
+        params: {
+          studentId: this.user.student_no,
+        },
+      }).then((res) => {
+        console.log(res)
+        if ((res.state == 1)) {
+          this.admissionList = res.data;
+        }
+      })
     },
-    readySelect(e, id) {
-      var studentId = this.$store.state.id;
+    // 预选一个课题
+    readySelect(topicId) {
+      const studentId = this.user.student_no
       request({
         url: "student/primary",
         method: "post",
         params: {
-          studentId: studentId,
-          topicId: id,
+          studentId,
+          topicId,
         },
       }).then((res) => {
-        // console.log(res);
-        if (res.state == 1) {
+        const message = res.message
+        if (res.state === 1) {
           this.$message({
-            message: "预选成功",
+            message,
             type: "success",
           });
-          this.$store.commit("changeTableData", this.list[e]);
-          this.$refs.span[e].innerHTML = "已预选";
-          this.$refs.div[e].style = "pointer-events: none";
+          // 成功之后获取一遍新的数据
+          this.getAdmissionList()
         }else{
           this.$message({
-            message: "预选失败",
+            message,
             type: "danger",
           });
         }
       });
     },
+    load() {
+      this.count += 2;
+    }
   },
 };
 </script>
@@ -102,28 +92,29 @@ export default {
   width: 100%;
   height: calc(100vh - 100px);
   overflow: auto;
+  padding-bottom: 40px;
 }
 .instructor .ul {
   width: 100%;
-  height: calc(100vh - 100px);
   display: flex;
-  padding: 15px;
+  padding: 15px 15px 0 15px;
+  margin: 0;
   flex-wrap: wrap;
   list-style: none;
 }
+
 .instructor .ul .list_li {
-  width: 300px;
-  height: 300px;
+  flex: 1;
+  width: 33%;
   margin: 10px;
 }
 .instructor .ul .list_li .container {
   width: 300px;
-  height: 300px;
   padding: 0;
   /* margin: 20px 20px 20px 0; */
 }
 .instructor .ul .list_li .container .select {
-  height: 200px;
+  /*height: 200px;*/
   margin-bottom: 20px;
   border: 1px solid #909399;
   border-radius: 15px;
@@ -155,7 +146,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  width: 100%;
 }
 
 button {

@@ -5,43 +5,35 @@ import createPersistedState from 'vuex-persistedstate'
 Vue.use(Vuex)
 
 const state = {
-    count: 0,
-    // 学生或老师id
-    top: '',
-    // 学生或老师的名字
-    name: '',
-    // topic id
-    id: 0,
-    // 学生子组件状态
-    stuhomeState: '',
-    // home侧边导航栏高亮索引
-    heightLightIndex: "1",
-    // 教师子组件状态
-    teacherState: '',
+  // 登录账号对象
+  userForm: null
 }
+const actions = {
+  //这里面的方法是用来异步触发mutations里面的方法,context与store 实例具有相同方法和属性
+  resetVuex(context) {
+    context.commit('outLogin')
+  }
+};
+
 const mutations = {
-    changeTop(state, t = '') {
-        return (state.top = t)
-    },
-    changeName(state, n = '') {
-        return (state.name = n)
-    }, 
-    changeId(state, i = '') {
-        return (state.id = i)
-    },
-    changeState(state,[path,token] ){
-        return (
-            state.stuhomeState = path,
-            state.heightLightIndex = token
-            )
-    },
-    changeTeacherState(state, path){
-        return state.changeTeacherState = path
-    }
+  login(state, form) {
+    state.userForm = form
+  },
+  outLogin(state) {
+    state.userForm = null
+  }
+}
+
+const getters = {
+  user(state) {
+    return state.userForm
+  }
 }
 
 export default new Vuex.Store({
-    state,
-    mutations,
-    plugins: [createPersistedState()]
+  state,
+  actions,
+  mutations,
+  getters,
+  plugins: [createPersistedState()]
 })

@@ -48,22 +48,22 @@ const routes = [
         children: [
           {
             path: '/',
-            mark: {name: '首页'},
+            meta: {title: '首页'},
             component: () => import('../components/student/index')
           },
           {
             path: 'personalCenter',
-            mark: {name: '个人中心'},
+            meta: {title: '个人中心'},
             component: personalCenter
           },
           {
             path: 'readyContent',
-            mark: {name: '我的预选'},
+            meta: {title: '我的预选'},
             component: readyContent
           },
           {
             path: 'myTopic',
-            mark: {name: '我的课题'},
+            meta: {title: '我的课题'},
             component: () => import('../components/student/myTopic')
           },
           {
@@ -79,27 +79,27 @@ const routes = [
           {
             path: '/',
             name: 'TeaHome',
-            mark: {name: '首页'},
+            meta: {title: '首页'},
             component: () => import('../components/student/index')
           },
           {
             path: 'myTopic',
-            mark: {name: '我的课题'},
+            meta: {title: '我的课题'},
             component: myTopic
           },
           {
             path: 'newlyAdded',
-            mark: {name: '添加课题'},
+            meta: {title: '添加课题'},
             component: newlyAdded
           },
           {
             path: 'topicManage',
-            mark: {name: '管理课题'},
+            meta: {title: '管理课题'},
             component: topicManage
           },
           {
             path: 'personalCenter',
-            mark: {name: '个人中心'},
+            meta: {title: '个人中心'},
             component: personalCenter2
           },
         ]
@@ -109,13 +109,13 @@ const routes = [
   {
     path: '/',
     name: 'Login',
-    mark: {name: '登录'},
+    meta: {title: '登录'},
     component: () => import('../views/Login.vue')
   },
   {
     path: '/password/update',
     name: 'passwordUpdate',
-    mark: {name: '密码修改'},
+    meta: {title: '密码修改'},
     component: () => import(/* webpackChunkName: "about" */ '../views/passwordUpdate')
   },
 ]
@@ -126,10 +126,12 @@ const router = new VueRouter({
   routes
 })
 
-// router.beforeEach(( to, from, next) => {
-//   if(to.name == 'studenthome'){
-//     console.log(1)
-//   }
-// })
+router.beforeEach(( to, from, next) => {
+  if(to.meta.title) {
+    window.document.title = to.meta.title
+  }
+
+  next()
+})
 
 export default router

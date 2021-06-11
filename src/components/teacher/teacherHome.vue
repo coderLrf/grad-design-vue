@@ -37,7 +37,7 @@
             <span style="margin-right:20px;">{{user.teacher_name}}</span>
             <el-dropdown>
               <span class="el-dropdown-link">
-                <img src="../../assets/login.jpg"/>
+                <img :src="iconPath"/>
               </span>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item
@@ -70,7 +70,9 @@
         userName: 'vic',
         headImgSrc: "require(../../assets/login.jpg)",
         defaultPath: '/home/teacherHome',
-        user: null
+        user: null,
+        iconPathState: false,
+        iconPath: 'http://localhost:9527'
       };
     },
     mounted() {
@@ -79,6 +81,10 @@
     created() {
       this.user = this.$store.getters.user
       this.defaultPath = this.$route.path
+      if(this.user.userIcon !== null) {
+        this.iconPath += this.user.userIcon
+        this.iconPathState = true
+      }
     },
     methods: {
       beforeunloadHandler(e) {
@@ -101,6 +107,13 @@
         // 如果在教师端的路由范围内改变default值
         if(newPath.indexOf('teacherHome') !== -1) {
           this.defaultPath = newPath
+        }
+        // 如果用户对象不等于空
+        if(this.user.userIcon !== null) {
+          if(!this.iconPathState) {
+            this.iconPath += this.user.userIcon
+            this.iconPathState = true // 标志已用icon
+          }
         }
       }
     }

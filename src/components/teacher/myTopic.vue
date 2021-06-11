@@ -24,24 +24,39 @@
           </template>
           <template slot-scope="scope">
             <span v-if="scope.row.admission === '是'">
-              <el-tag effect="dark">已通过审核</el-tag>
+              <el-tag type="success" effect="dark">已通过审核</el-tag>
             </span>
             <span v-else-if="scope.row.admission === '否'">
-              <el-tag effect="danger">未通过审核</el-tag>
+              <el-tag type="danger" effect="dark">未通过审核</el-tag>
             </span>
             <span v-else>
-              <el-tag effect="info">审核中</el-tag>
+              <el-tag type="info" effect="dark">审核中</el-tag>
             </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="任务书" fixed="right" align="center">
+          <template slot-scope="scope">
+            <a v-if="scope.row.file" :href="lookFilePath + scope.row.file.filePath" class="lookFile">{{scope.row.fileName}}</a>
           </template>
         </el-table-column>
         <el-table-column label="操作" fixed="right" align="center">
           <template slot-scope="scope">
+            <el-upload :action="defaultUploadPath + scope.row.title_no"
+                       v-show="scope.row.admission === '是'"
+                       name="fileUpload"
+                       class="uploadFile"
+                       @on-success="uploadSuccess"
+                       :show-file-list="false"
+                       multiple
+                       style="display: inline-block">
+              <el-button size="small" type="primary">上传文件</el-button>
+            </el-upload>
             <el-button size="mini" type="primary"
-              @click="details(scope.$index, scope.row)">查看详情</el-button>
-            <el-button size="mini" type="primary"
-              @click="toEdit(scope.row)">编辑</el-button>
+                       @click="toEdit(scope.row)">编辑
+            </el-button>
             <el-button size="mini" type="danger"
-              @click="handleDelete(scope.row)">删除</el-button>
+                       @click="handleDelete(scope.row)">删除
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -72,115 +87,137 @@
 </template>
 
 <script>
-import {request} from '../../network/request'
+  import {request} from '../../network/request'
 
-export default {
-  name: "myTopic",
-  data() {
-    return {
-      myTopicList: [],
-      selectType: 'all', // 默认查询所有课题
-      topicForm: {},
-      showEditDialog: false // 控制编辑对话框的显示与隐藏
-    };
-  },
-  created(){
-    this.teacherId = this.$store.getters.user.teacher_no
-    this.getTopicList(this.selectType)
-  },
-  computed: {
-    admission(admission) {
-      let adm;
-      adm = admission === '是' ? '已通过审核' : admission === '是' ? '未通过审核' : '审核中'
-      return adm
-    }
-  },
-  methods:{
-    selectChange() {
+  export default {
+    name: "myTopic",
+    data() {
+      return {
+        myTopicList: [],
+        selectType: 'all', // 默认查询所有课题
+        topicForm: {},
+        showEditDialog: false, // 控制编辑对话框的显示与隐藏
+        defaultUploadPath: 'http://localhost:9527/api/teacher/uploadFile/', // 默认上传文件地址
+        filePath: '',
+        lookFilePath: 'http://localhost:9527'
+      };
+    },
+    created() {
+      this.teacherId = this.$store.getters.user.teacher_no
       this.getTopicList(this.selectType)
     },
-    // 获取该教师的课题
-    getTopicList(type) {
-      request({
-        url: 'teacher/list',
-        params:{
-          teacherId: this.$store.getters.user.teacher_no,
-          type
+    computed: {
+      admission(admission) {
+        let adm;
+        adm = admission === '是' ? '已通过审核' : admission === '是' ? '未通过审核' : '审核中'
+        return adm
+      }
+    },
+    methods: {
+      // 文件上传成功之后
+      uploadSuccess(res) {
+        if(res.state === 1) {
+          this.filePath = res.data.substr(res.data.lastIndexOf('_'))
+          // 重新请求一遍数据
+          this.getTopicList(this.selectType)
+          return this.$message.success(res.message)
         }
-      }).then(res => {
-        this.myTopicList = res.data
-      })
-    },
-    indexMethod(index) {
-      return (index += 1);
-    },
-    details(index,row){
-
-    },
-    toEdit(row){
-      this.showEditDialog = true
-      const form = {
-        topicId: row.title_no,
-        topicName: row.title_name,
-        topicDesc: row.title_desc,
-        teacherId: this.teacherId
-      }
-      this.topicForm = form
-    },
-    edit() {
-      // 检查判断
-      if(this.topicForm.topicName === '' || this.topicForm.topicDesc === '') {
-        return this.$message({
-          type: 'success',
-          message: '输入的内容不能为空哟.'
-        })
-      }
-      // 修改课题
-      request({
-        url: 'teacher/update',
-        method: 'post',
-        data: this.topicForm
-      }).then(res => {
-        this.$message({
-          type: 'success',
-          message: res.message
-        })
-        // 修改成功
-        this.showEditDialog = false
-        // 重新请求一遍数据
+        return this.$message.error(res.message)
+      },
+      // 选择类型
+      selectChange() {
         this.getTopicList(this.selectType)
-      })
-    },
-    handleDelete(row){
-      const topicId = row.title_no
-      this.$confirm('此操作将会删除该课题，是否继续？', '小提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        // 删除课题
+      },
+      // 获取该教师的课题
+      getTopicList(type) {
         request({
-          url: 'teacher/delete',
-          method: 'post',
+          url: 'teacher/list',
           params: {
-            topicId
+            teacherId: this.$store.getters.user.teacher_no,
+            type
           }
+        }).then(res => {
+          this.myTopicList = res.data
+        })
+      },
+      indexMethod(index) {
+        return (index += 1);
+      },
+      toEdit(row) {
+        this.showEditDialog = true
+        const form = {
+          topicId: row.title_no,
+          topicName: row.title_name,
+          topicDesc: row.title_desc,
+          teacherId: this.teacherId
+        }
+        this.topicForm = form
+      },
+      edit() {
+        // 检查判断
+        if (this.topicForm.topicName === '' || this.topicForm.topicDesc === '') {
+          return this.$message({
+            type: 'success',
+            message: '输入的内容不能为空哟.'
+          })
+        }
+        // 修改课题
+        request({
+          url: 'teacher/update',
+          method: 'post',
+          data: this.topicForm
         }).then(res => {
           this.$message({
             type: 'success',
             message: res.message
           })
-          // 删除成功
+          // 修改成功
+          this.showEditDialog = false
+          // 重新请求一遍数据
           this.getTopicList(this.selectType)
         })
-      }).catch(() => {
-        return false
-      })
+      },
+      handleDelete(row) {
+        const topicId = row.title_no
+        this.$confirm('此操作将会删除该课题，是否继续？', '小提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          // 删除课题
+          request({
+            url: 'teacher/delete',
+            method: 'post',
+            params: {
+              topicId
+            }
+          }).then(res => {
+            this.$message({
+              type: 'success',
+              message: res.message
+            })
+            // 删除成功
+            this.getTopicList(this.selectType)
+          })
+        }).catch(() => {
+          return false
+        })
+      }
     }
-  }
-};
+  };
 </script>
 
 <style scoped>
+  .uploadFile {
+    margin-right: 8px;
+  }
 
+  .lookFile{
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .lookFile:hover {
+    color: #7986cb;
+  }
 </style>

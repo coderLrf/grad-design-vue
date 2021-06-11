@@ -4,17 +4,17 @@
       <div class="a">
         <div class="imgheader">
           <div>
-            <img src="../../assets/login.jpg" alt="" />
+            <img :src="defaultIconPath" alt="" />
           </div>
         </div>
       </div>
-
-      <!-- 通过 limit和on-exceed来限制上传文件和个数定义超出限制时的行为，通过slot可以传入自定义的上传按钮类型和文字提示 -->
-      <!-- file-list 上传的文件列表, 例如: [{name: 'food.jpg', url: 'https://xxx.cdn.com/xxx.jpg'}] -->
-      <el-upload :action="action" :http-request="modeUpload">
+      <!-- 上传icon -->
+      <el-upload :action="defaultUploadPath" name="iconUpload"
+                 :show-file-list="false"
+                 :before-upload="uploadBefore"
+                 :on-success="uploadSuccess">
         <el-button size="small" type="primary">上传</el-button>
       </el-upload>
-      <el-button @click="upload" class="upload_button">点击上传头像</el-button>
     </el-col>
 
     <el-col :span="12">
@@ -63,30 +63,46 @@ export default {
       ],
       action: "https://jsonplaceholder.typicode.com/posts/",
       mode: {},
+      defaultUploadPath: 'http://localhost:9527/api/user/upload_icon/', // 默认上传文件地址
+      defaultPath: 'http://localhost:9527',
+      userIcon: ''
     };
   },
   created() {
     this.user = this.$store.getters.user
-    console.log(this.user)
-  },
-  methods: {
-    modeUpload(item) {
-      this.mode = item.file;
-    },
-    upload(){
-      request({
-        url: 'user/upload_icon/{id}',
-        method: 'post',
-        params:{
-          iconUpload: this.mode,
-          userId: this.$store.state.teacherId
-        }
-      }).then( res => {
-        console.log(res)
-      })
+    this.defaultUploadPath += this.user.teacher_no
+    if(this.user.userIcon !== null) {
+      this.userIcon = this.user.userIcon
     }
   },
-};
+  computed: {
+    defaultIconPath() {
+      return this.defaultPath + this.userIcon
+    }
+  },
+  methods: {
+    // 上传之前
+    uploadBefore(file) {
+      if(file.type !== 'image/jpeg' && file.type !== 'image/png') {
+        this.$message.error('上传的必须是图片格式，jpeg和png')
+        return false
+      }
+      return true
+    },
+    // 上传成功
+    uploadSuccess(res) {
+      if(res.state === 1) {
+        this.userIcon = res.data
+        // 更新用户数据
+        this.user.userIcon = res.data
+        // 更新vuex的用户数据
+        this.$store.dispatch('updateUser', this.user)
+        return this.$message.success(res.message)
+      }
+      return this.$message.error(res.message)
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -113,11 +129,6 @@ export default {
 .imgheader img {
   width: 200px;
   height: 200px;
-}
-.imgheader:hover img {
-  width: 300px;
-  height: 300px;
-  transition: 3s;
 }
 .el_form {
   margin-top: 35px;

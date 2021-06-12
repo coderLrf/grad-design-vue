@@ -47,7 +47,7 @@ export default {
           studentId: this.user.student_no,
         },
       }).then((res) => {
-        console.log(res)
+        // console.log(res)
         if ((res.state == 1)) {
           this.admissionList = res.data;
         }
@@ -137,8 +137,6 @@ export default {
   100% {
     background: pink;
     opacity: 1;
-    /* font-size: 18px; */
-    font-weight: bold;
   }
 }
 

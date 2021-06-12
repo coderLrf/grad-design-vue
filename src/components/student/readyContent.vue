@@ -12,20 +12,14 @@
           type="index"
           :index="indexMethod"
         ></el-table-column>
-        <el-table-column label="日期" width="200">
+        <el-table-column label="指导老师" width="200">
           <template slot-scope="scope">
-            <i class="el-icon-time"></i>
-            <span style="margin-left: 10px">{{ scope.row.date }}</span>
+            <el-tag size="medium" style="margin-left: 10px">{{ scope.row.teacher_name }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="课题名称" width="300">
           <template slot-scope="scope">
-            <el-popover trigger="hover" placement="top">
-              <p>指导老师: {{ scope.row.teacher_name }}</p>
-              <div slot="reference" class="name-wrapper">
-                <el-tag size="medium">{{ scope.row.title_name }}</el-tag>
-              </div>
-            </el-popover>
+            <span>{{ scope.row.title_name }}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" fixed="right">
@@ -69,9 +63,15 @@
             studentId: this.user.student_no,
           },
         }).then((res) => {
-          console.log(res)
-          if ((res.state == 1)) {
+          // console.log(res)
+          if ((res.data.length > 0)) {
             this.tableData = res.data;
+          }else{
+            this.$message({
+              message: res.message,
+              type: 'success',
+              duration: 2000,
+            })
           }
         })
       },
@@ -85,7 +85,7 @@
             studentId: this.user.student_no
           },
         }).then((res) => {
-          console.log(res)
+          // console.log(res)
           if (res.state == 1) {
             this.tableData.splice(index, 1);
             this.$message({

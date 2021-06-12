@@ -12,33 +12,25 @@
             text-color="#fff"
             active-text-color="#ffd04b">
             <el-menu-item index="/home/studentHome">
-              <i class="el-icon-location"></i>
+              <i class="el-icon-s-help"></i>
               <span slot="title">首页</span>
             </el-menu-item>
-            <el-menu-item
-              index="/home/studentHome/instructor"
-              :disabled="noCheck"
-              ref="noCheck">
-              <i class="el-icon-location"></i>
+            <el-menu-item index="/home/studentHome/instructor">
+              <i class="el-icon-menu"></i>
               <span slot="title">课题中心</span>
             </el-menu-item>
-            <el-menu-item
-              index="/home/studentHome/readyContent"
-              :disabled="noCheck"
-              ref="noCheck">
-              <i class="el-icon-menu"></i>
+            <el-menu-item index="/home/studentHome/readyContent">
+              <i class="el-icon-star-off"></i>
               <span slot="title">我的预选</span>
             </el-menu-item>
             <el-menu-item
               index="/home/studentHome/myTopic"
-              :disabled="check"
-              ref="check"
               class="aaaa">
-              <i class="el-icon-document"></i>
+              <i class="el-icon-star-on"></i>
               <span slot="title">我的课题</span>
             </el-menu-item>
             <el-menu-item index="/home/studentHome/personalCenter">
-              <i class="el-icon-document"></i>
+              <i class="el-icon-user-solid"></i>
               <span slot="title">个人中心</span>
             </el-menu-item>
           </el-menu>
@@ -47,17 +39,17 @@
       <el-container style="height: 100vh">
         <el-header>
           <div class="headImg">
-            <span style="margin-right: 20px">{{ user.student_name }}</span>
+            <span style="margin-right: 20px">{{ this.user.student_name }}</span>
             <el-dropdown>
               <span class="el-dropdown-link">
-<!--                <img v-if="user.userIcon != null" :src='user.userIcon'>-->
-                <img src="../../assets/login.jpg"/>
+                <i v-if="userIcon == null" class="el-icon-user"></i>
+                <img v-else :src="userIconPath + userIcon" alt="" />
               </span>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item @click.native="modify">
+                <el-dropdown-item @click.native="$router.push('/home/studentHome/personalCenter')">
                   个人资料
                 </el-dropdown-item>
-                <el-dropdown-item divided @click.native="changemm">
+                <el-dropdown-item divided @click.native="$router.push('/password/update')">
                   修改密码
                 </el-dropdown-item>
                 <el-dropdown-item divided @click.native="exit">
@@ -87,35 +79,29 @@
     name: "stuHome",
     data() {
       return {
-        userName: "",
         headImgSrc: "require(../../assets/login.jpg)",
-        defaultActive: "/home/studenthome/instructor",
-        noCheck: false,
-        check: true,
         defaultPath: '/home/studentHome',
-        user: null
+        user: null,
+        iconPathState: false,
+        userIconPath: 'http://localhost:9527',
+        iconPath: null
       };
     },
-    inject: ["reload"], // 引入方法
-    mounted() {
-      this.reload();
-    },
     created() {
-      this.userName = this.$store.state.userForm.student_name
       this.user = this.$store.getters.user
-      console.log(this.user)
-      this.reload()
-      // this.cancelAttr()
+      // console.log(this.user)
       this.defaultPath = this.$route.path
+      if(this.user.userIcon !== null && this.iconPath == null) {
+        this.iconPath = this.user.userIcon
+        this.iconPathState = true
+      }
+    },
+    computed: {
+      userIcon() {
+        return this.$store.getters.user.userIcon
+      }
     },
     methods: {
-      cancelAttr() {
-        var c = this.$store.state.check
-        if (c != true) {
-          this.noCheck = true
-          this.check = !this.check
-        }
-      },
       exit() {
         window.localStorage.clear();
         window.sessionStorage.clear();
@@ -127,14 +113,25 @@
           type: "success",
         });
         this.$router.replace("/");
+      }
+    },
+    watch: {
+      '$route.path'(newPath, oldPath) {
+        // 如果在教师端的路由范围内改变default值
+        if(newPath.indexOf('studentHome') !== -1) {
+          this.defaultPath = newPath
+        }
+        // 如果用户对象不等于空
+        if(this.user.userIcon !== null) {
+          if(!this.iconPathState) {
+            this.iconPath += this.user.userIcon
+            this.iconPathState = true // 标志已用icon
+          }
+        }
       },
-      modify() {
-        this.personalCenter();
-      },
-      changemm() {
-        // console.log(1)
-        this.$router.push("/register");
-      },
+      userIcon(newIcon, oldIcon) {
+        this.iconPath = newIcon
+      }
     }
   };
 </script>

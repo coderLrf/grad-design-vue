@@ -9,23 +9,27 @@
                    text-color="#fff"
                    active-text-color="#ffd04b">
             <el-menu-item index="/home/teacherHome">
-              <i class="el-icon-location"></i>
+              <i class="el-icon-message-solid"></i>
               <span slot="title">首页</span>
             </el-menu-item>
             <el-menu-item index="/home/teacherHome/newlyAdded">
-              <i class="el-icon-location"></i>
+              <i class="el-icon-folder-add"></i>
               <span slot="title">新增课题</span>
             </el-menu-item>
             <el-menu-item index="/home/teacherHome/myTopic">
-              <i class="el-icon-menu"></i>
+              <i class="el-icon-document"></i>
               <span slot="title">我的课题</span>
             </el-menu-item>
             <el-menu-item index="/home/teacherHome/topicManage">
-              <i class="el-icon-document"></i>
+              <i class="el-icon-menu"></i>
               <span slot="title">管理课题</span>
             </el-menu-item>
+            <el-menu-item index="/home/teacherHome/myStudent">
+              <i class="el-icon-coordinate"></i>
+              <span slot="title">我的学生</span>
+            </el-menu-item>
             <el-menu-item index="/home/teacherHome/personalCenter">
-              <i class="el-icon-document"></i>
+              <i class="el-icon-user-solid"></i>
               <span slot="title">个人中心</span>
             </el-menu-item>
           </el-menu>
@@ -41,8 +45,7 @@
                 <img v-else :src="userIconPath + iconPath"/>
               </span>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item
-                  @click.native="$router.push('/home/teacherHome/personalCenter')">个人资料
+                <el-dropdown-item @click.native="$router.push('/home/teacherHome/personalCenter')">个人资料
                 </el-dropdown-item>
                 <el-dropdown-item divided @click.native="$router.push('/password/update')">修改密码</el-dropdown-item>
                 <el-dropdown-item divided @click.native="exit">退出登录</el-dropdown-item>
@@ -54,7 +57,6 @@
         <el-main>
           <router-view></router-view>
         </el-main>
-
         <el-footer height="40px">
           <h6>tips:每天进步一点点</h6>
         </el-footer>
@@ -78,28 +80,32 @@
       };
     },
     created() {
-      this.user = this.$store.getters.user
-      this.defaultPath = this.$route.path
-      if(this.user.userIcon !== null && this.iconPath == null) {
-        this.iconPath = this.user.userIcon
-        this.iconPathState = true
+      if(this.$store.getters.user) {
+        this.user = this.$store.getters.user
+        this.defaultPath = this.$route.path
+        if(this.user.userIcon !== null && this.iconPath == null) {
+          this.iconPath = this.user.userIcon
+          this.iconPathState = true
+        }
       }
     },
     computed: {
       userIcon() {
-        return this.$store.getters.user.userIcon
+        return this.$store.getters.user ? this.$store.getters.user.userIcon : null
       }
     },
     methods: {
+      // 退出
       exit() {
         this.$store.dispatch('resetVuex')
+        // 清空session
         window.localStorage.clear()
         this.$notify({
           title: "消息",
           message: "退出成功",
           type: "success",
-        });
-        this.$router.replace("/");
+        })
+        this.$router.replace("/")
       }
     },
     watch: {

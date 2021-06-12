@@ -65,6 +65,8 @@
                   path = '/home/teacherHome'
                 }
                 this.$store.commit('login', res.data)
+                // 将用户对象保存到local 装换为json数据
+                window.localStorage.setItem('user', JSON.stringify(res.data))
                 // 等待200ms进入首页，登录成功
                 setTimeout(() => {
                   this.$router.replace(path)

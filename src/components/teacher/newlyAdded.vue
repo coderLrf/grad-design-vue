@@ -66,15 +66,15 @@
           url: "teacher/add/topic",
           method: "post",
           data: this.topicForm,
-        }).then((res) => {
+        }).then(res => {
           const message = res.message
           if(res.state === 1) {
-            this.$message({
-              type: 'success',
-              message
-            })
+            this.$message.success(message)
             // 清空表单
             this.emptyForm()
+          } else {
+           // 添加失败
+            this.$message.error(message)
           }
         }).catch(err => {
           this.$message({

@@ -15,6 +15,7 @@ import router from './router'
 import axios from 'axios'
 // 挂载axios
 Vue.prototype.$axios = axios
+
 // 设置访问根路径
 // axios.defaults.baseURL = "http://localhost:9527"
 

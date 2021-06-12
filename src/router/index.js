@@ -7,15 +7,16 @@ const studentHome = () => import('../components/student/studentHome')
 const teacherHome = () => import('../components/teacher/teacherHome')
 
 // studentHome页面下的子组件
-const personalCenter = () => import("../components/student/personalCenter");
-const readyContent = () => import("../components/student/readyContent");
-const instructor = () => import("../components/student/instructor");
+const personalCenter = () => import("../components/student/personalCenter")
+const readyContent = () => import("../components/student/readyContent")
+const instructor = () => import("../components/student/instructor")
 
 // teacherHome页面下的子组件
-const myTopic = () => import("../components/teacher/myTopic");
-const newlyAdded = () => import("../components/teacher/newlyAdded");
-const topicManage = () => import("../components/teacher/topicManage");
-const personalCenter2 = () => import("../components/teacher/personalCenter");
+const myTopic = () => import("../components/teacher/myTopic")
+const newlyAdded = () => import("../components/teacher/newlyAdded")
+const topicManage = () => import("../components/teacher/topicManage")
+const personalCenter2 = () => import("../components/teacher/personalCenter")
+const myStudent = () => import('../components/teacher/myStudent')
 
 Vue.use(VueRouter)
 
@@ -86,6 +87,11 @@ const routes = [
             meta: {title: '个人中心'},
             component: personalCenter2
           },
+          {
+            path: 'myStudent',
+            meta: {title: '我的学生'},
+            component: myStudent
+          }
         ]
       },
     ]
@@ -113,10 +119,35 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes
 })
-
+/**
+ * 路由导航守卫
+ */
 router.beforeEach(( to, from, next) => {
   if(to.meta.title) {
     window.document.title = to.meta.title
+  }
+  if(to.path === '/' || to.path === '/login') {
+    // 如果是首页或者登录页面，直接放行
+    return next()
+  }
+  // 从session中取出user对象，判断是否存在，如果不存在，未登录
+  const user = JSON.parse(window.localStorage.getItem('user'))
+  // 如果存在用户
+  if(user) {
+    // 从user对象中取出身份
+    const identity = user.identity
+    // 身份拦截
+    if(to.path.indexOf(identity) === -1) {
+      // 如果身份错误
+      Vue.prototype.$message.warning('请正确的访问路径哟~')
+      // 返回刚才进入的路径
+      return setTimeout(() => {
+        history.back()
+      }, 800)
+    }
+  } else { // 如果还没有登录，请先登录
+    Vue.prototype.$message.warning('您还未登录，请先登录哟~')
+    next('/login')
   }
   next()
 })

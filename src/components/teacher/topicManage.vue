@@ -44,7 +44,7 @@
     name: "topicManagMent",
     data() {
       return {
-        stuList: []
+        stuList: null
       };
     },
     created() {
@@ -61,7 +61,7 @@
             teacherId: this.teacherId,
           },
         }).then((res) => {
-          if(res.state === 1 && res.data.length !== 0) {
+          if(res.state === 1) {
             this.stuList = res.data
           }
         }).catch((err) => {
@@ -71,6 +71,7 @@
       indexMethod(index) {
         return (index += 1)
       },
+      // 定选课题
       determine(index, row) {
         // 获取课题id和学生id
         const topicId = row.title_no
@@ -83,7 +84,12 @@
             studentId,
           },
         }).then((res) => {
-          console.log(res)
+          if(res.state !== -1) {
+            // 重新获取一遍数据
+            this.getSelectPrimary()
+            return this.$message.success(res.message)
+          }
+          return this.$message.error(res.message)
         });
       },
       handleDelete(index, row) {

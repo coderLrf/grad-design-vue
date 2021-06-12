@@ -4,7 +4,8 @@
       <div class="a">
         <div class="imgheader">
           <div>
-            <img :src="defaultIconPath" alt="" />
+            <i v-if="userIcon == null" class="el-icon-user"></i>
+            <img v-else :src="userIconPath + userIcon" alt="" />
           </div>
         </div>
       </div>
@@ -29,9 +30,9 @@
           <span>{{user.institute_name}}</span>
         </el-form-item>
         <el-form-item label="职称:">
-          <el-tag effect="success" v-if="user.degree === '初级教师'">{{user.degree}}</el-tag>
+          <el-tag effect="dark" type="success" v-if="user.degree === '初级教师'">{{user.degree}}</el-tag>
           <el-tag v-else-if="user.degree === '中级教师'">{{user.degree}}</el-tag>
-          <el-tag effect="warning" v-else-if="user.degree === '高级教师'">{{user.degree}}</el-tag>
+          <el-tag effect="dark" type="warning" v-else-if="user.degree === '高级教师'">{{user.degree}}</el-tag>
           <span v-else>暂无职称</span>
         </el-form-item>
         <el-form-item label="座右铭：">
@@ -64,8 +65,8 @@ export default {
       action: "https://jsonplaceholder.typicode.com/posts/",
       mode: {},
       defaultUploadPath: 'http://localhost:9527/api/user/upload_icon/', // 默认上传文件地址
-      defaultPath: 'http://localhost:9527',
-      userIcon: ''
+      userIconPath: 'http://localhost:9527',
+      userIcon: null
     };
   },
   created() {
@@ -73,11 +74,6 @@ export default {
     this.defaultUploadPath += this.user.teacher_no
     if(this.user.userIcon !== null) {
       this.userIcon = this.user.userIcon
-    }
-  },
-  computed: {
-    defaultIconPath() {
-      return this.defaultPath + this.userIcon
     }
   },
   methods: {
@@ -97,7 +93,7 @@ export default {
         this.user.userIcon = res.data
         // 更新vuex的用户数据
         this.$store.dispatch('updateUser', this.user)
-        return this.$message.success(res.message)
+        return this.$message.success('用户icon上传成功.')
       }
       return this.$message.error(res.message)
     }
@@ -129,6 +125,10 @@ export default {
 .imgheader img {
   width: 200px;
   height: 200px;
+}
+
+.imgheader .el-icon-user {
+  font-size: 12em;
 }
 .el_form {
   margin-top: 35px;

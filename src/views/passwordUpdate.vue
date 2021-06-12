@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="wrap">
     <el-form v-if="!showSuccess" ref="form" :model="form" class="form-box"
              :rules="rules"
              method="post">
@@ -135,6 +135,11 @@
 </script>
 
 <style scoped>
+  .wrap {
+    height: 100vh;
+    overflow: hidden;
+  }
+
   .form-box {
     width: 350px;
     margin: 50px auto;
@@ -142,6 +147,19 @@
     border-radius: 5px;
     padding: 20px;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    animation: startLogin cubic-bezier(0, 1.13, 0.58, 1) 0.38s forwards;
+  }
+
+  @keyframes startLogin {
+    0% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 
   .form-box .text {

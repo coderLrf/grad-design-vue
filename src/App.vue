@@ -1,8 +1,6 @@
 <template>
   <div id="app">
-    <keep-alive>
-      <router-view v-if="isRouterAlive" />
-    </keep-alive>
+    <router-view v-if="isRouterAlive" />
   </div>
 </template>
 

@@ -208,6 +208,10 @@
 </script>
 
 <style scoped>
+  .content {
+    overflow: hidden;
+  }
+
   .uploadFile {
     margin-right: 8px;
   }

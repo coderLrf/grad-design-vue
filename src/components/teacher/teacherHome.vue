@@ -37,7 +37,8 @@
             <span style="margin-right:20px;">{{user.teacher_name}}</span>
             <el-dropdown>
               <span class="el-dropdown-link">
-                <img :src="iconPath"/>
+                <i v-if="iconPath == null" class="el-icon-user"></i>
+                <img v-else :src="userIconPath + iconPath"/>
               </span>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item
@@ -72,28 +73,27 @@
         defaultPath: '/home/teacherHome',
         user: null,
         iconPathState: false,
-        iconPath: 'http://localhost:9527'
+        userIconPath: 'http://localhost:9527',
+        iconPath: null
       };
-    },
-    mounted() {
-      window.addEventListener("beforeunload", this.beforeunloadHandler, false)
     },
     created() {
       this.user = this.$store.getters.user
       this.defaultPath = this.$route.path
-      if(this.user.userIcon !== null) {
-        this.iconPath += this.user.userIcon
+      if(this.user.userIcon !== null && this.iconPath == null) {
+        this.iconPath = this.user.userIcon
         this.iconPathState = true
       }
     },
+    computed: {
+      userIcon() {
+        return this.$store.getters.user.userIcon
+      }
+    },
     methods: {
-      beforeunloadHandler(e) {
-        e.returnValue = "确认刷新？";
-      },
       exit() {
-        window.localStorage.clear();
-        window.sessionStorage.clear();
         this.$store.dispatch('resetVuex')
+        window.localStorage.clear()
         this.$notify({
           title: "消息",
           message: "退出成功",
@@ -115,6 +115,9 @@
             this.iconPathState = true // 标志已用icon
           }
         }
+      },
+      userIcon(newIcon, oldIcon) {
+        this.iconPath = newIcon
       }
     }
   };
@@ -143,6 +146,10 @@
     height: 40px;
     border-radius: 20px;
     border: 1px solid #545c64;
+  }
+
+  .el-header .headImg .el-icon-user {
+    font-size: 1.5em;
   }
 
   .el-footer {

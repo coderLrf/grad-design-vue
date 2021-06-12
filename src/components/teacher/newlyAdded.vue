@@ -67,7 +67,6 @@
           method: "post",
           data: this.topicForm,
         }).then((res) => {
-          console.log(res)
           const message = res.message
           if(res.state === 1) {
             this.$message({

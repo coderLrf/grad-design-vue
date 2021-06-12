@@ -103,10 +103,8 @@
     },
     methods: {
       exit() {
-        window.localStorage.clear();
-        window.sessionStorage.clear();
         this.$store.dispatch('resetVuex')
-        this.reload();
+        window.localStorage.clear()
         this.$notify({
           title: "消息",
           message: "退出成功",

@@ -5,7 +5,7 @@
         :data="myTopicList"
         stripe
         ref="li">
-        <el-table-column label="序号" type="index" :index="indexMethod" align="center"></el-table-column>
+        <el-table-column label="序号" type="index" :index="index => {return index + 1}" align="center"></el-table-column>
         <el-table-column label="课题名称" align="center">
           <template slot-scope="scope">
             <span>{{ scope.row.title_name }}</span>
@@ -36,7 +36,8 @@
         </el-table-column>
         <el-table-column label="任务书" fixed="right" align="center">
           <template slot-scope="scope">
-            <a v-if="scope.row.file" :href="lookFilePath + scope.row.file.filePath" class="lookFile">{{scope.row.fileName}}</a>
+            <a v-if="scope.row.file" target="view_window"
+               :href="lookFilePath + scope.row.file.filePath" class="lookFile">{{scope.row.fileName}}</a>
           </template>
         </el-table-column>
         <el-table-column label="操作" fixed="right" align="center">
@@ -45,7 +46,8 @@
                        v-show="scope.row.admission === '是'"
                        name="fileUpload"
                        class="uploadFile"
-                       @on-success="uploadSuccess"
+                       :on-success="uploadSuccess"
+                       :before-upload="uploadBefore"
                        :show-file-list="false"
                        multiple
                        style="display: inline-block">
@@ -116,13 +118,23 @@
     methods: {
       // 文件上传成功之后
       uploadSuccess(res) {
-        if(res.state === 1) {
+        if (res.state !== -1) {
           this.filePath = res.data.substr(res.data.lastIndexOf('_'))
           // 重新请求一遍数据
           this.getTopicList(this.selectType)
           return this.$message.success(res.message)
         }
         return this.$message.error(res.message)
+      },
+      // 文件上传之前
+      uploadBefore(file) {
+        // 这里限制文件上传类型，只能是PDF和Word类型
+        const suffixName = file.name.substr(file.name.lastIndexOf('.') + 1)
+        const type = suffixName === 'docx' || suffixName === 'pdf'
+        if(!type) { // 如果不符合类型
+          this.$message.error('上传的必须是文件格式，docx和pdf')
+          return false
+        }
       },
       // 选择类型
       selectChange() {
@@ -139,9 +151,6 @@
         }).then(res => {
           this.myTopicList = res.data
         })
-      },
-      indexMethod(index) {
-        return (index += 1);
       },
       toEdit(row) {
         this.showEditDialog = true
@@ -216,7 +225,7 @@
     margin-right: 8px;
   }
 
-  .lookFile{
+  .lookFile {
     text-decoration: none;
     cursor: pointer;
   }

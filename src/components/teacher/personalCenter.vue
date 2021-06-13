@@ -1,21 +1,7 @@
 <template>
   <div class="personalCenter">
     <el-col :span="12">
-      <div class="a">
-        <div class="imgheader">
-          <div>
-            <i v-if="userIcon == null" class="el-icon-user"></i>
-            <img v-else :src="userIconPath + userIcon" alt="" />
-          </div>
-        </div>
-      </div>
-      <!-- 上传icon -->
-      <el-upload :action="defaultUploadPath" name="iconUpload"
-                 :show-file-list="false"
-                 :before-upload="uploadBefore"
-                 :on-success="uploadSuccess">
-        <el-button size="small" type="primary">上传</el-button>
-      </el-upload>
+      <upload-icon />
     </el-col>
 
     <el-col :span="12">
@@ -69,26 +55,13 @@
 
 <script>
 import {request} from '../../network/request'
+import uploadIcon from "../commons/uploadIcon"
 
 export default {
   name: "personalCenter",
   data() {
     return {
-      fileList: [
-        {
-          name: "food.jpeg",
-          url: "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100",
-        },
-        {
-          name: "food2.jpeg",
-          url: "https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100",
-        },
-      ],
       instList: null, // 用来保存所有学院数据
-      action: "https://jsonplaceholder.typicode.com/posts/",
-      defaultUploadPath: 'http://localhost:9527/api/user/upload_icon/', // 默认上传文件地址
-      userIconPath: 'http://localhost:9527',
-      userIcon: null,
 
       showUpdateDegree: false, // 用来控制修改职称按钮的显示
       degreeBox: false, // 控制选择职称的box
@@ -101,6 +74,9 @@ export default {
       user: null, // 当前登录用户对象
     }
   },
+  components: {
+    uploadIcon
+  },
   created() {
     this.user = this.$store.getters.user
     this.defaultUploadPath += this.user.teacher_no
@@ -109,6 +85,8 @@ export default {
     }
     // 请求学院数据
     this.getInstitute()
+    this.selectInstitute = this.user.institute_no
+    this.selectDegree = this.user.degree.replace('教师', '')
   },
   methods: {
     // 取消修改（修改完成）
@@ -116,7 +94,7 @@ export default {
       if(this.degreeBox) {
         this.updateDegree()
       }
-      if(this.instList && this.selectInstitute) {
+      if(this.instBox && this.selectInstitute) {
         this.updateInst()
       }
     },
@@ -174,24 +152,6 @@ export default {
       }).catch(err => {
         console.log(err)
       })
-    },
-    // 上传之前
-    uploadBefore(file) {
-      if(file.type !== 'image/jpeg' && file.type !== 'image/png') {
-        this.$message.error('上传的必须是图片格式，jpeg和png')
-        return false
-      }
-      return true
-    },
-    // 上传成功
-    uploadSuccess(res) {
-      if(res.state === 1) {
-        this.userIcon = res.data
-        this.user.userIcon = res.data // 更新用户数据
-        this.$store.dispatch('updateUser', this.user) // 更新vuex的用户数据
-        return this.$message.success('用户icon上传成功.')
-      }
-      return this.$message.error(res.message)
     },
     // 请求所有学院数据
     getInstitute() {

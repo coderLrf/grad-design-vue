@@ -3,6 +3,10 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
+window.addEventListener('storage', () => {
+  console.log('监听了变化')
+}, false)
+
 const state = {
   // 登录账号对象
   userForm: JSON.parse(window.localStorage.getItem('user'))

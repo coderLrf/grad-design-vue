@@ -1,8 +1,15 @@
 <template>
     <div class="myTopic">
-      <div v-if="boo">
-        <h2>"{{ this.title_name }}"</h2>
-        <el-button type="primary" class="download">任务书下载</el-button>
+      <div v-if="topic !== null">
+        <h2>"{{ topic.title_name }}"</h2>
+        <h6 class="teacher">
+          <span>指导老师：</span>
+          <el-tag effect="dark">{{topic.teacher_name}}</el-tag>
+        </h6>
+        <el-button type="primary" class="download" @click.native="download">任务书下载</el-button>
+      </div>
+      <div v-else>
+        <h2>还未存在定选课题，快去预选课题吧~</h2>
       </div>
     </div>
 </template>
@@ -14,45 +21,63 @@ export default {
     name: "myTopic",
     data() {
       return{
-        user:{},
-        title_name: '',
-        boo: false
+        user: null,
+        topic: null
       }
     },
     created(){
       this.user = this.$store.getters.user
       this.getAlreadySelectTopic()
-      this.toggle()
     },
     methods:{
+      // 下载任务书
+      download() {
+        // 判断任务书是否存在，如果存在则下载，反之，显示提示信息
+        this.getDownloadTopic()
+      },
+      // 获取任务书列表
       getAlreadySelectTopic() {
         request({
-          url: "student/already",
+          url: "student/topic/ok",
           params: {
-            studentId: this.user.student_no,
-          },
+            studentId: this.user.student_no
+          }
         }).then( res => {
-          this.title_name = res.data.title_name
+          if(res.state !== -1) {
+            console.log(res)
+            this.topic = res.data
+          }
         })
       },
-      toggle(){
-        if(this.user.topic_no != null){
-          return this.boo = true
-        } else {
-          this.$message({
-            message: '还未定选课题哟',
-            type: 'warning',
-            duration: 2000
-          })
-          return this.boo = false
-        }
+      // 获取该课题任务书
+      getDownloadTopic() {
+        return request({
+          url: 'student/mission',
+          params: {
+            topicId: this.user.topic_no
+          }
+        }).then(res => {
+          if(res.state !== -1) {
+            // 存在任务书，下载
+            window.open(res.data.filePath)
+          } else {
+            this.$message.warning(res.message)
+          }
+        }).catch(err => {
+          console.log(err)
+        })
       }
     }
 }
 </script>
 
 <style scoped>
+
+  .teacher {
+    margin: 20px 0;
+  }
+
 .el-button--primary{
-  margin-top: 2em;
+  margin-top: 0.8em;
 }
 </style>

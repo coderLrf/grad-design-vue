@@ -89,7 +89,22 @@
         num: 5
       }
     },
+    created() {
+      this.judgeId()
+    },
     methods: {
+      //判断有没有user，有就给学号
+      judgeId(){
+        const user = this.$store.getters.user
+        // console.log(user)
+        if(user != null){
+          if(user.identity == 'student'){
+            this.form.id = user.student_no
+          }else{
+            this.form.id = user.teacher_no
+          }
+        }
+      },
       // 密码修改
       submitForm(formName) {
         this.$refs[formName].validate((valid) => {

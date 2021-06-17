@@ -89,7 +89,7 @@
     },
     created() {
       this.user = this.$store.getters.user
-      // console.log(this.user)
+      console.log(this.user)
       this.defaultPath = this.$route.path
       if(this.user.userIcon !== null && this.iconPath == null) {
         this.iconPath = this.user.userIcon

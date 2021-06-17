@@ -126,7 +126,7 @@ router.beforeEach(( to, from, next) => {
   if(to.meta.title) {
     window.document.title = to.meta.title
   }
-  if(to.path === '/' || to.path === '/login') {
+  if(to.path === '/' || to.path === '/login' || to.path=== '/password/update') {
     // 如果是首页或者登录页面，直接放行
     return next()
   }

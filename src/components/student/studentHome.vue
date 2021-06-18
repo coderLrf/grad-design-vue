@@ -47,8 +47,8 @@
             <span style="margin-right: 20px">{{ this.user.student_name }}</span>
             <el-dropdown>
               <span class="el-dropdown-link">
-                <i v-if="userIcon == null" class="el-icon-user"></i>
-                <img v-else :src="userIconPath + userIcon" alt="" />
+                <i v-if="iconPath == null" class="el-icon-user"></i>
+                <img v-else :src="userIconPath + iconPath" alt="" />
               </span>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item @click.native="$router.push('/home/studentHome/personalCenter')">

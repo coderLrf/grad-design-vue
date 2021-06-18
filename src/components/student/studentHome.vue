@@ -78,6 +78,8 @@
 </template>
 
 <script>
+import {request} from "@/network/request";
+
   export default {
     name: "stuHome",
     data() {
@@ -96,7 +98,6 @@
       if(this.user != null) {
         this.getUser()
       }
-      console.log(this.user)
       console.log(this.user)
         this.defaultPath = this.$route.path
         if(this.user.userIcon !== null && this.iconPath == null) {

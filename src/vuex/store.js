@@ -3,9 +3,9 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
-window.addEventListener('storage', () => {
-  console.log('监听了变化')
-}, false)
+// window.addEventListener('storage', () => {
+//   console.log('监听了变化')
+// }, false)
 
 const state = {
   // 登录账号对象

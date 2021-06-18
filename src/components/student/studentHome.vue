@@ -91,14 +91,18 @@
       };
     },
     created() {
-      if(this.$store.getters.user) {
-        this.user = this.$store.getters.user
+      this.user = this.$store.getters.user
+      // 获取最新用户信息
+      if(this.user != null) {
+        this.getUser()
+      }
+      console.log(this.user)
+      console.log(this.user)
         this.defaultPath = this.$route.path
         if(this.user.userIcon !== null && this.iconPath == null) {
           this.iconPath = this.user.userIcon
           this.iconPathState = true
         }
-      }
     },
     computed: {
       userIcon() {
@@ -106,6 +110,22 @@
       }
     },
     methods: {
+      getUser() {
+        request({
+          url: 'user/get',
+          params: {
+            userId: this.user.user_no
+          }
+        }).then(res => {
+          if(res.state !== -1) {
+            this.user = res.data
+            // 更新vuex的用户对象
+            this.$store.dispatch('updateUser', this.user)
+          }
+        }).catch(err => {
+          console.log(err)
+        })
+      },
       exit() {
         this.$store.dispatch('resetVuex')
         window.localStorage.clear()

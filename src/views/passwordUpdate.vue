@@ -5,7 +5,7 @@
              method="post">
       <h3>请填写信息</h3>
       <el-form-item label="学号" prop="id">
-        <el-input v-model="form.id" :readonly="form.id != ''"></el-input>
+        <el-input v-model="form.id"></el-input>
       </el-form-item>
       <el-form-item label="原密码" prop="oldPass">
         <el-input v-model="form.oldPass" type="password"></el-input>
@@ -86,8 +86,7 @@
           id: [{required: true, validator: validateId, trigger: 'blur'}]
         },
         showSuccess: false, // 控制密码修改完成
-        num: 5,
-        user: null
+        num: 5
       }
     },
     created() {
@@ -97,6 +96,7 @@
       //判断有没有user，有就给学号
       judgeId(){
         const user = this.$store.getters.user
+        // console.log(user)
         if(user != null){
           if(user.identity == 'student'){
             this.form.id = user.student_no

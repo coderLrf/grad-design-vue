@@ -24,10 +24,15 @@
               <span slot="title">我的预选</span>
             </el-menu-item>
             <el-menu-item
-              index="/home/studentHome/myTopic"
-              class="aaaa">
+              index="/home/studentHome/myTopic">
               <i class="el-icon-star-on"></i>
               <span slot="title">我的课题</span>
+            </el-menu-item>
+            <el-menu-item
+                index="/home/studentHome/communicate"
+                class="aaaa">
+              <i class="el-icon-s-promotion"></i>
+              <span slot="title">沟通</span>
             </el-menu-item>
             <el-menu-item index="/home/studentHome/personalCenter">
               <i class="el-icon-user-solid"></i>
@@ -60,7 +65,7 @@
           </div>
         </el-header>
 
-        <el-main>
+        <el-main class="el_main">
           <router-view></router-view>
         </el-main>
 
@@ -73,9 +78,6 @@
 </template>
 
 <script>
-
-  import {request} from "../../network/request";
-
   export default {
     name: "stuHome",
     data() {
@@ -85,20 +87,17 @@
         user: null,
         iconPathState: false,
         userIconPath: 'http://localhost:9527',
-        iconPath: null
+        iconPath: null,
       };
     },
     created() {
-      this.user = this.$store.getters.user
-      // 获取最新用户信息
-      if(this.user != null) {
-        this.getUser()
-      }
-      console.log(this.user)
-      this.defaultPath = this.$route.path
-      if(this.user.userIcon !== null && this.iconPath == null) {
-        this.iconPath = this.user.userIcon
-        this.iconPathState = true
+      if(this.$store.getters.user) {
+        this.user = this.$store.getters.user
+        this.defaultPath = this.$route.path
+        if(this.user.userIcon !== null && this.iconPath == null) {
+          this.iconPath = this.user.userIcon
+          this.iconPathState = true
+        }
       }
     },
     computed: {
@@ -107,22 +106,6 @@
       }
     },
     methods: {
-      getUser() {
-        request({
-          url: 'user/get',
-          params: {
-            userId: this.user.user_no
-          }
-        }).then(res => {
-          if(res.state !== -1) {
-            this.user = res.data
-            // 更新vuex的用户对象
-            this.$store.dispatch('updateUser', this.user)
-          }
-        }).catch(err => {
-          console.log(err)
-        })
-      },
       exit() {
         this.$store.dispatch('resetVuex')
         window.localStorage.clear()
@@ -171,6 +154,9 @@
     display: flex;
     align-items: center;
     flex-direction: row-reverse;
+  }
+  .el_main{
+    padding: 0;
   }
 
   .el-header .headImg img {

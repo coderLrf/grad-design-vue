@@ -33,7 +33,7 @@ export default {
       // 下载任务书
       download() {
         // 判断任务书是否存在，如果存在则下载，反之，显示提示信息
-        this.getDownloadTopic()
+        // this.getDownloadTopic()
       },
       // 获取任务书列表
       getAlreadySelectTopic() {
@@ -44,14 +44,14 @@ export default {
           }
         }).then( res => {
           if(res.state !== -1) {
-            console.log(res)
+            // console.log(res)
             this.topic = res.data
           }
         })
       },
       // 获取该课题任务书
       getDownloadTopic() {
-        request({
+        return request({
           url: 'student/mission',
           params: {
             topicId: this.user.topic_no

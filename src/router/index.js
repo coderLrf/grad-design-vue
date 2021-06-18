@@ -52,6 +52,11 @@ const routes = [
             component: () => import('../components/student/myTopic')
           },
           {
+            path: 'communicate',
+            meta: {title: '沟通'},
+            component: () => import('../components/student/communicate')
+          },
+          {
             path: 'instructor',
             component: instructor
           }

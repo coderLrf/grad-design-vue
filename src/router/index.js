@@ -96,6 +96,11 @@ const routes = [
             path: 'myStudent',
             meta: {title: '我的学生'},
             component: myStudent
+          },
+          {
+            path: 'conversation',
+            meta: {title: '会话'},
+            component: () => import('../components/teacher/conversation')
           }
         ]
       },

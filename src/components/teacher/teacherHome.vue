@@ -28,6 +28,10 @@
               <i class="el-icon-coordinate"></i>
               <span slot="title">我的学生</span>
             </el-menu-item>
+            <el-menu-item index="/home/teacherHome/conversation">
+              <i class="el-icon-s-promotion"></i>
+              <span slot="title">会话</span>
+            </el-menu-item>
             <el-menu-item index="/home/teacherHome/personalCenter">
               <i class="el-icon-user-solid"></i>
               <span slot="title">个人中心</span>
@@ -145,6 +149,9 @@
     display: flex;
     align-items: center;
     flex-direction: row-reverse;
+  }
+  .el-main{
+    padding: 0;
   }
 
   .el-header .headImg img {

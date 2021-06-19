@@ -63,6 +63,7 @@
         }).then(res => {
           if(res.state !== -1) {
             this.studentList = res.data
+            console.log(res.data)
           } else {
             this.$message.error(res.message)
           }

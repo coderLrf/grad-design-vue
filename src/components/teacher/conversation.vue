@@ -1,9 +1,15 @@
 <template>
-  <div class="communicate">
-    <div class="msg" v-if="topic !== null">
-      <div class="topBox">
+  <div class="conversation">
+    <div class="msg" v-if="studentList.length > 0">
+      <div class="aside">
+        <ul>
+          <li v-for="item in studentList">{{ item.student_name }}</li>
+        </ul>
+      </div>
+      <div class="main">
+        <div class="topBox">
         <ul class="list">
-<!--          收到消息-->
+          <!--          收到消息-->
           <li>
             <div class="teaLeft">
               <i v-if="iconPath == null" class="el-icon-user user"></i>
@@ -15,7 +21,7 @@
               <p>{{ backMsg }}</p>
             </div>
           </li>
-<!--          发送的消息-->
+          <!--          发送的消息-->
           <li>
             <div class="meLeaf">
               <i v-if="iconPath == null" class="el-icon-user user"></i>
@@ -56,15 +62,18 @@
         </ul>
       </div>
 
-      <form class="con">
-        <textarea class="textarea" wrap="hard" v-model="sendMsg" autofocus placeholder="请输入"></textarea>
-<!--        <button class="btn" @click="send()">发送</button>-->
-        <input type="button" class="btn" value="发送" @click="send()" @keyup.enter="send()">
-      </form>
+        <div class="con">
+          <form action="">
+            <textarea class="textarea" wrap="hard" v-model="sendMsg" autofocus placeholder="请输入"></textarea>
+            <!--        <button class="btn" @click="send()">发送</button>-->
+            <input type="button" class="btn" value="发送" @click="send()" @keyup.enter="send()">
+          </form>
+      </div>
+      </div>
     </div>
 
     <div v-else>
-      <h1>还未有定选的课题哟</h1>
+      <h1>还未有定选学生噢</h1>
     </div>
   </div>
 </template>
@@ -73,7 +82,7 @@
 import {request} from "@/network/request";
 
 export default {
-  name: 'communicate',
+  name: 'conversation',
   data(){
     return{
       userIconPath: 'http://localhost:9527',
@@ -81,31 +90,35 @@ export default {
       backMsg: 'abcdef',
       sendMsg: '',
       user: null,
-      topic:  null
+      studentList: []
     }
   },
   created() {
-    this.user = this.$store.getters.user
-    this.getAlreadySelectTopic()
-  },
-  computed: {
-    userIcon() {
-      return this.$store.getters.user.userIcon
+    const user = this.$store.getters.user
+    if(user != null && this.teacherId == null) {
+      this.teacherId = user.teacher_no
     }
+    // 请求数据
+    this.getPrimaryTopic()
   },
   methods:{
-    // 获取任务书列表
-    getAlreadySelectTopic() {
+    // 获取该教师定选的学生
+    getPrimaryTopic() {
       request({
-        url: "student/topic/ok",
+        url: '/teacher/primary/ok',
         params: {
-          studentId: this.user.student_no
+          teacherId: this.teacherId
         }
-      }).then( res => {
+      }).then(res => {
         if(res.state !== -1) {
-          // console.log(res)
-          this.topic = res.data
+          this.studentList = res.data
+          console.log(res.data)
+        } else {
+          this.$message.error(res.message)
+          console.log(res.message)
         }
+      }).catch(err => {
+        console.log(err)
       })
     },
     //发送事件
@@ -122,10 +135,11 @@ export default {
     }
   }
 }
+
 </script>
 
 <style scoped>
-.communicate{
+.conversation{
   padding: 0;
   width: 100%;
   height: calc(100vh - 100px);
@@ -133,16 +147,20 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 14px;
 }
-.communicate .msg{
-  width: 806px;
+.conversation .msg{
+  width: 956px;
   height: 80vh;
   border: 1px solid saddlebrown;
   position: relative;
-  border-radius: 10px;
+  border-radius: 0 10px 10px 10px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   animation: startLogin cubic-bezier(0, 1.13, 0.58, 1) 0.35s forwards;
+  display: flex;
+  flex-direction: row;
+  background: url("../../assets/com.jpg") no-repeat fixed;
+  background-size: cover;
+  font-size: 16px;
 }
 @keyframes startLogin {
   0% {
@@ -155,19 +173,52 @@ export default {
     opacity: 1;
   }
 }
+
+.aside{
+  width: 150px;
+  height: 80vh;
+  /*background: #409EFF;*/
+  border-radius: 0 0 0 10px;
+  border-right: 3px solid rgb(250,236,216);
+;
+}
+.aside ul{
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.aside ul li{
+  width: 147px;
+  height: 80px;
+  text-align: center;
+  line-height: 80px;
+  color: #fff;
+  border-bottom: 1px solid paleturquoise;
+}
+.aside ul li:hover{
+  background: pink;
+}
+
+.main{
+  width: 810px;
+  height: 80vh;
+}
+
+
 /*输入框*/
 .con{
-  width: 100%;
+  width: 810px;
   height: 20vh;
-  border-top: 2px solid rgb(250,236,216);
+  border-top: 1px solid rgb(250,236,216);
+  padding-top: 1px;
   position: absolute;
   bottom: 0;
 }
 /*文本域*/
 .con .textarea{
-  width: 780px;
-  margin: 15px 0 0 0;
-  height: 50px;
+  width: 100%;
+  /*margin: 15px 0 0 0;*/
+  height: 10vh;
   border: 0;
   /*去掉点击textarea中显示的边框和右下角的双杠*/
   outline: none;
@@ -175,6 +226,8 @@ export default {
   resize: none !important;
   border-radius: 0;
   background: transparent;
+  /*border-style: none;*/
+  color: #fff;
 }
 /*发送btn*/
 .con .btn{
@@ -184,7 +237,7 @@ export default {
   color: #fff;
   line-height: 100%;
   float: right;
-  margin:20px 30px 0 0;
+  margin:3vh 30px 0 0;
 }
 
 /*内容框*/
@@ -193,9 +246,9 @@ export default {
   height: 60vh;
   overflow: auto;
   overflow-x: hidden;
-  background: url("../../assets/com.jpg") no-repeat fixed;
+  /*background: url("../../assets/com.jpg") no-repeat fixed;*/
   background-size: cover;
-  border-radius: 10px 10px 0 0;
+  border-radius: 0px 10px 0 0;
 }
 .list{
   padding: 8px 0 0 0;

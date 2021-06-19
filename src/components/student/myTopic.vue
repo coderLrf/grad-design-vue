@@ -34,6 +34,7 @@ export default {
       download() {
         // 判断任务书是否存在，如果存在则下载，反之，显示提示信息
         this.getDownloadTopic()
+        // console.log(this.getAlreadySelectTopic())
       },
       // 获取任务书列表
       getAlreadySelectTopic() {
@@ -60,6 +61,7 @@ export default {
           if(res.state !== -1) {
             // 存在任务书，下载
             window.open(res.data.filePath)
+            // console.log(res)
           } else {
             this.$message.warning(res.message)
           }

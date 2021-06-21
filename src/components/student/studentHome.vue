@@ -28,12 +28,6 @@
               <i class="el-icon-star-on"></i>
               <span slot="title">我的课题</span>
             </el-menu-item>
-            <el-menu-item
-                index="/home/studentHome/communicate"
-                class="aaaa">
-              <i class="el-icon-s-promotion"></i>
-              <span slot="title">沟通</span>
-            </el-menu-item>
             <el-menu-item index="/home/studentHome/personalCenter">
               <i class="el-icon-user-solid"></i>
               <span slot="title">个人中心</span>
@@ -107,7 +101,7 @@ import {request} from "@/network/request";
     },
     computed: {
       userIcon() {
-        return this.$store.getters.user.userIcon
+        return this.$store.getters.user ? this.$store.getters.user.userIcon : null
       }
     },
     methods: {
@@ -129,6 +123,7 @@ import {request} from "@/network/request";
       },
       exit() {
         this.$store.dispatch('resetVuex')
+        window.sessionStorage.clear()
         window.localStorage.clear()
         this.$notify({
           title: "消息",

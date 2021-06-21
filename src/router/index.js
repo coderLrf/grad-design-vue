@@ -20,6 +20,12 @@ const myStudent = () => import('../components/teacher/myStudent')
 
 Vue.use(VueRouter)
 
+// 重复点击导航时，控制台出现报错 ，虽然不影响功能使用，但也不能视而不见。
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch(err => err)
+}
+
 const routes = [
   {
     path: '/home',
@@ -49,12 +55,14 @@ const routes = [
           {
             path: 'myTopic',
             meta: {title: '我的课题'},
-            component: () => import('../components/student/myTopic')
-          },
-          {
-            path: 'communicate',
-            meta: {title: '沟通'},
-            component: () => import('../components/student/communicate')
+            component: () => import('../components/student/myTopic'),
+            children:[
+                {
+                  path: '/',
+                  meta: {title: '沟通'},
+                  component: () => import('../components/student/communicate')
+                },
+            ]
           },
           {
             path: 'instructor',
@@ -95,13 +103,15 @@ const routes = [
           {
             path: 'myStudent',
             meta: {title: '我的学生'},
-            component: myStudent
+            component: myStudent,
+            children:[
+              {
+                path: 'conversation',
+                meta: {title: '会话'},
+                component: () => import('../components/teacher/conversation')
+              }
+            ]
           },
-          {
-            path: 'conversation',
-            meta: {title: '会话'},
-            component: () => import('../components/teacher/conversation')
-          }
         ]
       },
     ]

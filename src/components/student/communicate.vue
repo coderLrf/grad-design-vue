@@ -1,17 +1,19 @@
 <template>
   <div class="communicate">
+    <el-button type="primary" @click.native="communicateBack()" class="backBtn btn">返回</el-button>
     <div class="msg" v-if="topic !== null">
       <div class="topBox">
         <ul class="list">
 <!--          收到消息-->
           <li>
+<!--            头像-->
             <div class="teaLeft">
               <i v-if="iconPath == null" class="el-icon-user user"></i>
               <img v-else :src="userIconPath + iconPath" alt="" />
             </div>
-
+<!--            消息-->
             <div class="teaRight">
-              <span>张三老师</span>
+              <span>{{ topic.teacher_name }}</span>
               <p>{{ backMsg }}</p>
             </div>
           </li>
@@ -24,40 +26,40 @@
 
             <div class="meRight">
               <span>我</span>
-              <p>{{ backMsg }}</p>
+              <p>nullnull</p>
             </div>
           </li>
 
-          <!--          收到消息-->
-          <li>
-            <div class="teaLeft">
-              <i v-if="iconPath == null" class="el-icon-user user"></i>
-              <img v-else :src="userIconPath + iconPath" alt="" />
-            </div>
+<!--          &lt;!&ndash;          收到消息&ndash;&gt;-->
+<!--          <li>-->
+<!--            <div class="teaLeft">-->
+<!--              <i v-if="iconPath == null" class="el-icon-user user"></i>-->
+<!--              <img v-else :src="userIconPath + iconPath" alt="" />-->
+<!--            </div>-->
 
-            <div class="teaRight">
-              <span>张三老师</span>
-              <p>{{ backMsg }}</p>
-            </div>
-          </li>
-          <!--          发送的消息-->
-          <li>
-            <div class="meLeaf">
-              <i v-if="iconPath == null" class="el-icon-user user"></i>
-              <img v-else :src="userIconPath + iconPath" alt="" />
-            </div>
+<!--            <div class="teaRight">-->
+<!--              <span>张三老师</span>-->
+<!--              <p>{{ backMsg }}</p>-->
+<!--            </div>-->
+<!--          </li>-->
+<!--          &lt;!&ndash;          发送的消息&ndash;&gt;-->
+<!--          <li>-->
+<!--            <div class="meLeaf">-->
+<!--              <i v-if="iconPath == null" class="el-icon-user user"></i>-->
+<!--              <img v-else :src="userIconPath + iconPath" alt="" />-->
+<!--            </div>-->
 
-            <div class="meRight">
-              <span>我</span>
-              <p>{{ backMsg }}</p>
-            </div>
-          </li>
+<!--            <div class="meRight">-->
+<!--              <span>我</span>-->
+<!--              <p>{{ backMsg }}</p>-->
+<!--            </div>-->
+<!--          </li>-->
 
         </ul>
       </div>
 
       <form class="con">
-        <textarea class="textarea" wrap="hard" v-model="sendMsg" autofocus placeholder="请输入"></textarea>
+        <textarea class="textarea" wrap="hard" v-model="chatRecord.content" autofocus placeholder="请输入"></textarea>
 <!--        <button class="btn" @click="send()">发送</button>-->
         <input type="button" class="btn" value="发送" @click="send()" @keyup.enter="send()">
       </form>
@@ -79,9 +81,14 @@ export default {
       userIconPath: 'http://localhost:9527',
       iconPath: null,
       backMsg: 'abcdef',
-      sendMsg: '',
       user: null,
-      topic:  null
+      topic: null,
+      chatRecord:{
+        teacher_id: null,
+        student_id: null,
+        content: '',
+        message_side: null
+      }
     }
   },
   created() {
@@ -94,6 +101,24 @@ export default {
     }
   },
   methods:{
+
+    //返回任务父页面
+    communicateBack(){
+      this.$emit('func',false)
+      sessionStorage.setItem('communicateBoo',JSON.stringify(false))
+    },
+
+    // 获取留言记录
+    requestMessage(){
+      request({
+        url: 'user/record/add',
+        method: 'post',
+        data:{
+
+        }
+      })
+    },
+
     // 获取任务书列表
     getAlreadySelectTopic() {
       request({
@@ -103,15 +128,29 @@ export default {
         }
       }).then( res => {
         if(res.state !== -1) {
-          // console.log(res)
+          console.log(res)
           this.topic = res.data
         }
       })
     },
     //发送事件
+    // 用户进行留言
     send(){
       if(this.sendMsg != ''){
-        console.log(111)
+        this.chatRecord.teacher_id = this.topic.teacher_no
+        this.chatRecord.student_id = this.user.student_no
+        this.chatRecord.message_side = 44
+        request({
+          url: 'user/record/add',
+          method: 'post',
+          data:{
+            chatRecord: this.chatRecord
+          }
+        }).then(res => {
+          console.log(res)
+        }).then(err => {
+          console.log(err)
+        })
       }else{
         this.$message({
           type: "warning",
@@ -125,6 +164,14 @@ export default {
 </script>
 
 <style scoped>
+
+.backBtn{
+  float:left;
+  margin: 10px;
+}
+.btn{
+  display: inline;
+}
 .communicate{
   padding: 0;
   width: 100%;

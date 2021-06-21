@@ -83,6 +83,7 @@ export default {
       backMsg: 'abcdef',
       user: null,
       topic: null,
+      teacher_no: null,
       chatRecord:{
         teacher_id: null,
         student_id: null,
@@ -94,6 +95,7 @@ export default {
   created() {
     this.user = this.$store.getters.user
     this.getAlreadySelectTopic()
+    this.requestMessage()
   },
   computed: {
     userIcon() {
@@ -111,15 +113,17 @@ export default {
     // 获取留言记录
     requestMessage(){
       request({
-        url: 'user/record/add',
-        method: 'post',
-        data:{
-
+        url: 'user/get/records',
+        param:{
+          teacherId : this.teacher_no,
+          studentId : this.user.student_no
         }
+      }).then(res => {
+        console.log(res)
       })
     },
 
-    // 获取任务书列表
+    // 获取任务书列表  教师id
     getAlreadySelectTopic() {
       request({
         url: "student/topic/ok",
@@ -128,8 +132,9 @@ export default {
         }
       }).then( res => {
         if(res.state !== -1) {
-          console.log(res)
           this.topic = res.data
+          this.teacher_no = this.topic.teacher_no
+          console.log(this.topic)
         }
       })
     },
@@ -145,7 +150,9 @@ export default {
           method: 'post',
           data: this.chatRecord
         }).then(res => {
-          console.log(res)
+          if(res.state == 1){
+            this.chatRecord.content = ''
+          }
         }).then(err => {
 
         })

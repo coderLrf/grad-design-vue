@@ -139,17 +139,15 @@ export default {
       if(this.sendMsg != ''){
         this.chatRecord.teacher_id = this.topic.teacher_no
         this.chatRecord.student_id = this.user.student_no
-        this.chatRecord.message_side = 44
+        this.chatRecord.message_side = this.user.student_no
         request({
           url: 'user/record/add',
           method: 'post',
-          data:{
-            chatRecord: this.chatRecord
-          }
+          data: this.chatRecord
         }).then(res => {
           console.log(res)
         }).then(err => {
-          console.log(err)
+
         })
       }else{
         this.$message({

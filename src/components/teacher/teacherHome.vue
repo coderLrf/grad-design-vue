@@ -28,10 +28,6 @@
               <i class="el-icon-coordinate"></i>
               <span slot="title">我的学生</span>
             </el-menu-item>
-            <el-menu-item index="/home/teacherHome/conversation">
-              <i class="el-icon-s-promotion"></i>
-              <span slot="title">会话</span>
-            </el-menu-item>
             <el-menu-item index="/home/teacherHome/personalCenter">
               <i class="el-icon-user-solid"></i>
               <span slot="title">个人中心</span>
@@ -80,7 +76,7 @@
         user: null,
         iconPathState: false,
         userIconPath: 'http://localhost:9527',
-        iconPath: null
+        iconPath: null,
       };
     },
     created() {
@@ -104,6 +100,7 @@
         this.$store.dispatch('resetVuex')
         // 清空session
         window.localStorage.clear()
+        window.sessionStorage.clear()
         this.$notify({
           title: "消息",
           message: "退出成功",

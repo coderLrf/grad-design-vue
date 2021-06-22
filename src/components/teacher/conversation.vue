@@ -1,61 +1,26 @@
 <template>
   <div class="conversation">
-    <div class="msg" v-if="studentList.length > 0">
-      <div class="aside">
-        <ul>
-          <li v-for="item in studentList">{{ item.student_name }}</li>
-        </ul>
-      </div>
+    <div class="msg">
       <div class="main">
+
+        <div class="topTop">
+            <el-button type="primary" class="backBtn" @click.native="conversationBack()">返回</el-button>
+            <span>{{ row.student_name }}</span>
+        </div>
+
         <div class="topBox">
         <ul class="list">
           <!--          收到消息-->
-          <li>
-            <div class="teaLeft">
+          <li v-for="(item,index) in list">
+            <!--            头像-->
+            <div :class="item.message_side === teacherId ? 'meLeaf' : 'teaLeft'">
               <i v-if="iconPath == null" class="el-icon-user user"></i>
               <img v-else :src="userIconPath + iconPath" alt="" />
             </div>
-
-            <div class="teaRight">
-              <span>张三老师</span>
-              <p>{{ backMsg }}</p>
-            </div>
-          </li>
-          <!--          发送的消息-->
-          <li>
-            <div class="meLeaf">
-              <i v-if="iconPath == null" class="el-icon-user user"></i>
-              <img v-else :src="userIconPath + iconPath" alt="" />
-            </div>
-
-            <div class="meRight">
-              <span>我</span>
-              <p>{{ backMsg }}</p>
-            </div>
-          </li>
-
-          <!--          收到消息-->
-          <li>
-            <div class="teaLeft">
-              <i v-if="iconPath == null" class="el-icon-user user"></i>
-              <img v-else :src="userIconPath + iconPath" alt="" />
-            </div>
-
-            <div class="teaRight">
-              <span>张三老师</span>
-              <p>{{ backMsg }}</p>
-            </div>
-          </li>
-          <!--          发送的消息-->
-          <li>
-            <div class="meLeaf">
-              <i v-if="iconPath == null" class="el-icon-user user"></i>
-              <img v-else :src="userIconPath + iconPath" alt="" />
-            </div>
-
-            <div class="meRight">
-              <span>我</span>
-              <p>{{ backMsg }}</p>
+            <!--            消息-->
+            <div :class="item.message_side === teacherId ? 'meRight' : 'teaRight'">
+              <span>{{ item.message_side === teacherId ? '我' : item.student.student_name}}</span>
+              <p>{{ item.content }}</p>
             </div>
           </li>
 
@@ -64,16 +29,11 @@
 
         <div class="con">
           <form action="">
-            <textarea class="textarea" wrap="hard" v-model="sendMsg" autofocus placeholder="请输入"></textarea>
-            <!--        <button class="btn" @click="send()">发送</button>-->
+            <textarea class="textarea" wrap="hard" v-model="chatRecord.content" autofocus placeholder="请输入"></textarea>
             <input type="button" class="btn" value="发送" @click="send()" @keyup.enter="send()">
           </form>
       </div>
       </div>
-    </div>
-
-    <div v-else>
-      <h1>还未有定选学生噢</h1>
     </div>
   </div>
 </template>
@@ -90,47 +50,84 @@ export default {
       backMsg: 'abcdef',
       sendMsg: '',
       user: null,
-      studentList: []
+      teacherId: null,
+      studentList: [],
+      row: null,
+      chatRecord:{
+        teacher_id: null,
+        student_id: null,
+        content: '',
+        message_side: null
+      },
+      list: []
     }
   },
+  inject: ['reload'], // 引入方法
+  // props:{
+  //   obj:{type:Object,default:{}} //paramsObj为父组件传过来的对象
+  // },
+  // watch:{    //监听
+  //   obj: {
+  //     immediate:true,
+  //     handler: function(value) {
+  //       this.row = value
+  //       console.log(this.row)
+  //     }
+  //   }
+  // },
   created() {
     const user = this.$store.getters.user
+    this.row = JSON.parse(sessionStorage.getItem('stu'))
     if(user != null && this.teacherId == null) {
       this.teacherId = user.teacher_no
     }
-    // 请求数据
-    this.getPrimaryTopic()
+    this.requestMessage()
   },
   methods:{
-    // 获取该教师定选的学生
-    getPrimaryTopic() {
+    conversationBack(){
+      this.$emit('func',false)
+      sessionStorage.setItem('conversationBoo',JSON.stringify(false))
+    },
+    // 获取留言记录
+    requestMessage(){
       request({
-        url: '/teacher/primary/ok',
-        params: {
-          teacherId: this.teacherId
+        url: 'user/get/records',
+        params:{
+          teacherId : this.teacherId,
+          studentId : this.row.student_no
         }
       }).then(res => {
-        if(res.state !== -1) {
-          this.studentList = res.data
-          console.log(res.data)
-        } else {
-          this.$message.error(res.message)
-          console.log(res.message)
-        }
-      }).catch(err => {
-        console.log(err)
+        this.list = res.data
+        console.log(this.list)
       })
     },
+
     //发送事件
+    // 用户进行留言
     send(){
-      if(this.sendMsg != ''){
-        console.log(111)
+      if(this.chatRecord.content.trim() != ''){
+        this.chatRecord.teacher_id = this.teacherId
+        this.chatRecord.student_id = this.row.student_no
+        this.chatRecord.message_side = this.teacherId
+        request({
+          url: 'user/record/add',
+          method: 'post',
+          data: this.chatRecord
+        }).then(res => {
+          if(res.state == 1){
+            this.chatRecord.content = ''
+          }
+          this.reload() //引用方法
+        }).then(err => {
+
+        })
       }else{
         this.$message({
           type: "warning",
           message: '内容不能为空噢',
           duration: 1500
         })
+        this.chatRecord.content = ''
       }
     }
   }
@@ -149,11 +146,11 @@ export default {
   align-items: center;
 }
 .conversation .msg{
-  width: 956px;
+  width: 806px;
   height: 80vh;
   border: 1px solid saddlebrown;
   position: relative;
-  border-radius: 0 10px 10px 10px;
+  border-radius: 10px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   animation: startLogin cubic-bezier(0, 1.13, 0.58, 1) 0.35s forwards;
   display: flex;
@@ -174,29 +171,22 @@ export default {
   }
 }
 
-.aside{
-  width: 150px;
-  height: 80vh;
-  /*background: #409EFF;*/
-  border-radius: 0 0 0 10px;
-  border-right: 3px solid rgb(250,236,216);
-;
+.topTop{
+  width: 805px;
+  height: 6vh;
+  border-radius: 10px 10px 0 0 ;
+  border-bottom: 1px solid rgb(250,236,216);
 }
-.aside ul{
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.topTop .backBtn{
+  border-radius: 10px;
+  margin: 0.5vh;
+  float: left;
 }
-.aside ul li{
-  width: 147px;
-  height: 80px;
+.topTop span{
+  line-height: 6vh;
   text-align: center;
-  line-height: 80px;
   color: #fff;
-  border-bottom: 1px solid paleturquoise;
-}
-.aside ul li:hover{
-  background: pink;
+  font-size: 20px;
 }
 
 .main{
@@ -243,7 +233,7 @@ export default {
 /*内容框*/
 .topBox{
   width: 100%;
-  height: 60vh;
+  height: 54vh;
   overflow: auto;
   overflow-x: hidden;
   /*background: url("../../assets/com.jpg") no-repeat fixed;*/

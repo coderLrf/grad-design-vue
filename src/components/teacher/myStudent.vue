@@ -1,5 +1,9 @@
 <template>
   <div class="my_student">
+    <div v-if="boo">
+      <router-view @func="judge"></router-view>
+    </div>
+    <div v-else>
     <el-table :data="studentList" style="width: 100%" stripe>
       <el-table-column label="序号" width="100" type="index" align="center"
                        :index="(index) => {return index + 1}"></el-table-column>
@@ -30,6 +34,7 @@
         </template>
       </el-table-column>
     </el-table>
+    </div>
   </div>
 </template>
 
@@ -41,7 +46,8 @@
     data() {
       return {
         teacherId: null,
-        studentList: null // 保存学生数据
+        studentList: null, // 保存学生数据
+        boo: false
       }
     },
     created() {
@@ -49,10 +55,15 @@
       if(user != null && this.teacherId == null) {
         this.teacherId = user.teacher_no
       }
+      this.boo = JSON.parse(sessionStorage.getItem('conversationBoo'))
       // 请求数据
       this.getPrimaryTopic()
     },
     methods: {
+      //子组件传递false
+      judge(value){
+        this.boo = value
+      },
       // 获取该教师定选的学生
       getPrimaryTopic() {
         request({
@@ -73,7 +84,9 @@
       },
       // 查看该学生
       bookStudent(row) {
-        console.log(row)
+        sessionStorage.setItem('stu',JSON.stringify(row))
+        this.boo = true
+        sessionStorage.setItem('conversationBoo',JSON.stringify(true));
       }
     }
   }

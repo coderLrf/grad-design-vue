@@ -106,7 +106,7 @@ const routes = [
             component: myStudent,
             children:[
               {
-                path: 'conversation',
+                path: '/',
                 meta: {title: '会话'},
                 component: () => import('../components/teacher/conversation')
               }

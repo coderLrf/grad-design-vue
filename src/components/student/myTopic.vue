@@ -78,7 +78,6 @@ export default {
       communicate(){
         this.boo = true
         sessionStorage.setItem('communicateBoo',JSON.stringify(true));
-        this.$router.push('/home/studentHome/myTopic')
       },
       // 下载任务书
       download() {

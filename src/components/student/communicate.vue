@@ -7,12 +7,12 @@
 <!--          收到消息-->
           <li v-for="(item,index) in list">
 <!--            头像-->
-            <div :class="item.flag === 1 ? 'meLeaf' : 'teaLeft'">
+            <div :class="item.message_side === user.student_no ? 'meLeaf' : 'teaLeft'">
               <i v-if="iconPath == null" class="el-icon-user user"></i>
               <img v-else :src="userIconPath + iconPath" alt="" />
             </div>
 <!--            消息-->
-            <div :class="item.flag === 1 ? 'meRight' : 'teaRight'">
+            <div :class="item.message_side === user.student_no ? 'meRight' : 'teaRight'">
               <span>{{ item.flag === 1 ? '我' : item.teacher.teacher_name}}</span>
               <p>{{ item.content }}</p>
             </div>
@@ -54,6 +54,7 @@ export default {
       list:[]
     }
   },
+  inject: ['reload'], // 引入方法
   props:['arr'],
   watch:{
     arr(value){
@@ -118,6 +119,7 @@ export default {
         }
       }).then(res => {
         this.list = res.data
+        console.log(this.list)
       })
     },
 
@@ -136,6 +138,7 @@ export default {
           if(res.state == 1){
             this.chatRecord.content = ''
           }
+          this.reload() //引用方法
         }).then(err => {
 
         })

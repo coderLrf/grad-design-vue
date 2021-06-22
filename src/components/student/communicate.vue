@@ -5,62 +5,24 @@
       <div class="topBox">
         <ul class="list">
 <!--          收到消息-->
-          <li>
+          <li v-for="(item,index) in list">
 <!--            头像-->
-            <div class="teaLeft">
+            <div :class="item.flag === 1 ? 'meLeaf' : 'teaLeft'">
               <i v-if="iconPath == null" class="el-icon-user user"></i>
               <img v-else :src="userIconPath + iconPath" alt="" />
             </div>
 <!--            消息-->
-            <div class="teaRight">
-              <span>{{ topic.teacher_name }}</span>
-              <p>{{ backMsg }}</p>
+            <div :class="item.flag === 1 ? 'meRight' : 'teaRight'">
+              <span>{{ item.flag === 1 ? '我' : item.teacher.teacher_name}}</span>
+              <p>{{ item.content }}</p>
             </div>
           </li>
-<!--          发送的消息-->
-          <li>
-            <div class="meLeaf">
-              <i v-if="iconPath == null" class="el-icon-user user"></i>
-              <img v-else :src="userIconPath + iconPath" alt="" />
-            </div>
-
-            <div class="meRight">
-              <span>我</span>
-              <p>nullnull</p>
-            </div>
-          </li>
-
-<!--          &lt;!&ndash;          收到消息&ndash;&gt;-->
-<!--          <li>-->
-<!--            <div class="teaLeft">-->
-<!--              <i v-if="iconPath == null" class="el-icon-user user"></i>-->
-<!--              <img v-else :src="userIconPath + iconPath" alt="" />-->
-<!--            </div>-->
-
-<!--            <div class="teaRight">-->
-<!--              <span>张三老师</span>-->
-<!--              <p>{{ backMsg }}</p>-->
-<!--            </div>-->
-<!--          </li>-->
-<!--          &lt;!&ndash;          发送的消息&ndash;&gt;-->
-<!--          <li>-->
-<!--            <div class="meLeaf">-->
-<!--              <i v-if="iconPath == null" class="el-icon-user user"></i>-->
-<!--              <img v-else :src="userIconPath + iconPath" alt="" />-->
-<!--            </div>-->
-
-<!--            <div class="meRight">-->
-<!--              <span>我</span>-->
-<!--              <p>{{ backMsg }}</p>-->
-<!--            </div>-->
-<!--          </li>-->
 
         </ul>
       </div>
 
       <form class="con">
         <textarea class="textarea" wrap="hard" v-model="chatRecord.content" autofocus placeholder="请输入"></textarea>
-<!--        <button class="btn" @click="send()">发送</button>-->
         <input type="button" class="btn" value="发送" @click="send()" @keyup.enter="send()">
       </form>
     </div>
@@ -82,48 +44,55 @@ export default {
       iconPath: null,
       backMsg: 'abcdef',
       user: null,
-      topic: null,
-      teacher_no: null,
+      topic: {},
       chatRecord:{
         teacher_id: null,
         student_id: null,
         content: '',
         message_side: null
-      }
+      },
+      list:[]
     }
   },
-  created() {
-    this.user = this.$store.getters.user
-    this.getAlreadySelectTopic()
-    this.requestMessage()
+  props:['arr'],
+  watch:{
+    arr(value){
+      this.list = value
+    }
   },
   computed: {
     userIcon() {
       return this.$store.getters.user.userIcon
     }
   },
+  //两个异步请求冲突，把提前需要的教师id在创建前准备好
+  beforeCreate() {
+    let user = this.$store.getters.user
+    request({
+      url: "student/topic/ok",
+      params: {
+        studentId: user.student_no
+      }
+    }).then( res => {
+      if(res.state !== -1) {
+        let topic = res.data
+        sessionStorage.setItem('teacherId',JSON.stringify(topic.teacher_no))
+      }
+    })
+  },
+  created() {
+    this.user = this.$store.getters.user
+    this.getAlreadySelectTopic()
+    this.requestMessage()
+  },
   methods:{
-
     //返回任务父页面
     communicateBack(){
       this.$emit('func',false)
       sessionStorage.setItem('communicateBoo',JSON.stringify(false))
     },
 
-    // 获取留言记录
-    requestMessage(){
-      request({
-        url: 'user/get/records',
-        param:{
-          teacherId : this.teacher_no,
-          studentId : this.user.student_no
-        }
-      }).then(res => {
-        console.log(res)
-      })
-    },
-
-    // 获取任务书列表  教师id
+    // 获取任务书列表  教师姓名
     getAlreadySelectTopic() {
       request({
         url: "student/topic/ok",
@@ -133,15 +102,29 @@ export default {
       }).then( res => {
         if(res.state !== -1) {
           this.topic = res.data
-          this.teacher_no = this.topic.teacher_no
-          console.log(this.topic)
         }
       })
     },
+
+    // 获取留言记录
+    requestMessage(){
+      //在sessionStorage中拿出教师id
+      let teacher_no = sessionStorage.getItem('teacherId')
+      request({
+        url: 'user/get/records',
+        params:{
+          teacherId : teacher_no,
+          studentId : this.user.student_no
+        }
+      }).then(res => {
+        this.list = res.data
+      })
+    },
+
     //发送事件
     // 用户进行留言
     send(){
-      if(this.sendMsg != ''){
+      if(this.chatRecord.content.trim() != ''){
         this.chatRecord.teacher_id = this.topic.teacher_no
         this.chatRecord.student_id = this.user.student_no
         this.chatRecord.message_side = this.user.student_no
@@ -162,6 +145,7 @@ export default {
           message: '内容不能为空噢',
           duration: 1500
         })
+        this.chatRecord.content = ''
       }
     }
   }

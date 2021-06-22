@@ -1,6 +1,6 @@
 <template>
     <div class="myTopic">
-      <router-view v-if="boo" @func="judge"></router-view>
+      <router-view v-if="boo" @func="judge" :arr="arr"></router-view>
       <div v-else>
       <div v-if="topic !== null">
         <h2>"{{ topic.title_name }}"</h2>
@@ -26,15 +26,49 @@ export default {
       return{
         user: null,
         topic: null,
-        boo: false
+        boo: false,
+        arr: []
       }
     },
+
+  //进communicata的第一时间没有获取到数据，试着在mytopic获取了传过去
+  beforeCreate() {
+    let user = this.$store.getters.user
+    request({
+      url: "student/topic/ok",
+      params: {
+        studentId: user.student_no
+      }
+    }).then( res => {
+      if(res.state !== -1) {
+        let topic = res.data
+        sessionStorage.setItem('teacherId',JSON.stringify(topic.teacher_no))
+      }
+    })
+  },
     created(){
       this.user = this.$store.getters.user
       this.getAlreadySelectTopic()
       this.boo = JSON.parse(sessionStorage.getItem('communicateBoo'))
+      //再请求一边
+      this.requestMessage()
     },
     methods:{
+      // 获取留言记录
+      requestMessage(){
+        //在sessionStorage中拿出教师id
+        let teacher_no = sessionStorage.getItem('teacherId')
+        request({
+          url: 'user/get/records',
+          params:{
+            teacherId : teacher_no,
+            studentId : this.user.student_no
+          }
+        }).then(res => {
+          this.arr = res.data
+        })
+      },
+
       //子组件传递false
       judge(value){
         this.boo = value

@@ -1,7 +1,8 @@
 <template>
   <div class="my_student">
     <div v-if="boo">
-      <router-view @func="judge"></router-view>
+<!--      <router-view @func="judge"></router-view>-->
+      <conversation @func="func" />
     </div>
     <div v-else>
     <el-table :data="studentList" style="width: 100%" stripe>
@@ -36,10 +37,13 @@
     </el-table>
     </div>
   </div>
+
+
 </template>
 
 <script>
   import {request} from "../../network/request"
+  import conversation from "../commons/conversation"
 
   export default {
     name: "myStudent",
@@ -49,6 +53,9 @@
         studentList: null, // 保存学生数据
         boo: false
       }
+    },
+    components: {
+      conversation
     },
     created() {
       const user = this.$store.getters.user
@@ -63,6 +70,9 @@
       //子组件传递false
       judge(value){
         this.boo = value
+      },
+      func(flag) {
+        this.boo = flag
       },
       // 获取该教师定选的学生
       getPrimaryTopic() {

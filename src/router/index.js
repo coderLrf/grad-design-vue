@@ -55,14 +55,7 @@ const routes = [
           {
             path: 'myTopic',
             meta: {title: '我的课题'},
-            component: () => import('../components/student/myTopic'),
-            children:[
-                {
-                  path: '/',
-                  meta: {title: '沟通'},
-                  component: () => import('../components/student/communicate')
-                },
-            ]
+            component: () => import('../components/student/myTopic')
           },
           {
             path: 'instructor',
@@ -103,14 +96,7 @@ const routes = [
           {
             path: 'myStudent',
             meta: {title: '我的学生'},
-            component: myStudent,
-            children:[
-              {
-                path: '/',
-                meta: {title: '会话'},
-                component: () => import('../components/teacher/conversation')
-              }
-            ]
+            component: myStudent
           },
         ]
       },

@@ -1,68 +1,73 @@
 <template>
-    <div class="myTopic">
-      <router-view v-if="boo" @func="judge" :arr="arr"></router-view>
-      <div v-else>
+  <div class="myTopic">
+    <conversation v-if="boo" @func="judge" :arr="arr" />
+<!--    <router-view v-if="boo" @func="judge" :arr="arr"></router-view>-->
+    <div v-else>
       <div v-if="topic !== null">
         <h2>"{{ topic.title_name }}"</h2>
         <h6 class="teacher" @click="communicate()">
           <span>指导老师：</span>
-          <el-tag effect="dark">{{topic.teacher_name}}</el-tag>
+          <el-tag  style="cursor: pointer" effect="dark">{{topic.teacher_name}}</el-tag>
         </h6>
         <el-button type="primary" class="download" @click.native="download">任务书下载</el-button>
       </div>
       <div v-else>
         <h2>还未存在定选课题，快去预选课题吧~</h2>
       </div>
-      </div>
     </div>
+  </div>
 </template>
 
 <script>
-import {request} from "@/network/request";
+  import {request} from "@/network/request";
+  import conversation from "../commons/conversation"
 
-export default {
+  export default {
     name: "myTopic",
     data() {
-      return{
+      return {
         user: null,
         topic: null,
         boo: false,
-        arr: []
+        arr: [],
+        teacherId: null
       }
     },
-
-  //进communicata的第一时间没有获取到数据，试着在mytopic获取了传过去
-  beforeCreate() {
-    let user = this.$store.getters.user
-    request({
-      url: "student/topic/ok",
-      params: {
-        studentId: user.student_no
-      }
-    }).then( res => {
-      if(res.state !== -1) {
-        let topic = res.data
-        sessionStorage.setItem('teacherId',JSON.stringify(topic.teacher_no))
-      }
-    })
-  },
-    created(){
+    components: {
+      conversation
+    },
+    //进communicata的第一时间没有获取到数据，试着在mytopic获取了传过去
+    beforeCreate() {
+      let user = this.$store.getters.user
+      request({
+        url: "student/topic/ok",
+        params: {
+          studentId: user.student_no
+        }
+      }).then(res => {
+        if (res.state !== -1) {
+          let topic = res.data
+          sessionStorage.setItem('teacherId', JSON.stringify(topic.teacher_no))
+        }
+      })
+    },
+    created() {
       this.user = this.$store.getters.user
       this.getAlreadySelectTopic()
       this.boo = JSON.parse(sessionStorage.getItem('communicateBoo'))
       //再请求一边
       this.requestMessage()
     },
-    methods:{
+    methods: {
       // 获取留言记录
-      requestMessage(){
+      requestMessage() {
         //在sessionStorage中拿出教师id
-        let teacher_no = sessionStorage.getItem('teacherId')
+        this.teacherId = sessionStorage.getItem('teacherId')
         request({
           url: 'user/get/records',
-          params:{
-            teacherId : teacher_no,
-            studentId : this.user.student_no
+          params: {
+            teacherId: this.teacherId,
+            studentId: this.user.student_no
           }
         }).then(res => {
           this.arr = res.data
@@ -70,14 +75,14 @@ export default {
       },
 
       //子组件传递false
-      judge(value){
+      judge(value) {
         this.boo = value
       },
-
       //跳转到谈话界面
-      communicate(){
+      communicate() {
         this.boo = true
-        sessionStorage.setItem('communicateBoo',JSON.stringify(true));
+        sessionStorage.setItem('tea', JSON.stringify(this.topic))
+        sessionStorage.setItem('communicateBoo', JSON.stringify(true));
       },
       // 下载任务书
       download() {
@@ -92,9 +97,8 @@ export default {
           params: {
             studentId: this.user.student_no
           }
-        }).then( res => {
-          if(res.state !== -1) {
-            // console.log(res)
+        }).then(res => {
+          if (res.state !== -1) {
             this.topic = res.data
           }
         })
@@ -107,7 +111,7 @@ export default {
             topicId: this.user.topic_no
           }
         }).then(res => {
-          if(res.state !== -1) {
+          if (res.state !== -1) {
             // 存在任务书，下载
             window.open(res.data.filePath)
             // console.log(res)
@@ -119,7 +123,7 @@ export default {
         })
       }
     }
-}
+  }
 </script>
 
 <style scoped>

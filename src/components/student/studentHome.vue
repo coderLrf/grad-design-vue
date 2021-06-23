@@ -42,7 +42,7 @@
             <el-dropdown>
               <span class="el-dropdown-link">
                 <i v-if="iconPath == null" class="el-icon-user"></i>
-                <img v-else :src="userIconPath + iconPath" alt="" />
+                <img v-else :src="userIconPath + iconPath" alt=""/>
               </span>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item @click.native="$router.push('/home/studentHome/personalCenter')">
@@ -72,7 +72,7 @@
 </template>
 
 <script>
-import {request} from "@/network/request";
+  import {request} from "@/network/request";
 
   export default {
     name: "stuHome",
@@ -89,15 +89,14 @@ import {request} from "@/network/request";
     created() {
       this.user = this.$store.getters.user
       // 获取最新用户信息
-      if(this.user != null) {
+      if (this.user != null) {
         this.getUser()
       }
-      console.log(this.user)
-        this.defaultPath = this.$route.path
-        if(this.user.userIcon !== null && this.iconPath == null) {
-          this.iconPath = this.user.userIcon
-          this.iconPathState = true
-        }
+      this.defaultPath = this.$route.path
+      if (this.user.userIcon !== null && this.iconPath == null) {
+        this.iconPath = this.user.userIcon
+        this.iconPathState = true
+      }
     },
     computed: {
       userIcon() {
@@ -112,7 +111,7 @@ import {request} from "@/network/request";
             userId: this.user.user_no
           }
         }).then(res => {
-          if(res.state !== -1) {
+          if (res.state !== -1) {
             this.user = res.data
             // 更新vuex的用户对象
             this.$store.dispatch('updateUser', this.user)
@@ -136,12 +135,12 @@ import {request} from "@/network/request";
     watch: {
       '$route.path'(newPath, oldPath) {
         // 如果在教师端的路由范围内改变default值
-        if(newPath.indexOf('studentHome') !== -1) {
+        if (newPath.indexOf('studentHome') !== -1) {
           this.defaultPath = newPath
         }
         // 如果用户对象不等于空
-        if(this.user.userIcon !== null) {
-          if(!this.iconPathState) {
+        if (this.user.userIcon !== null) {
+          if (!this.iconPathState) {
             this.iconPath += this.user.userIcon
             this.iconPathState = true // 标志已用icon
           }
@@ -171,7 +170,8 @@ import {request} from "@/network/request";
     align-items: center;
     flex-direction: row-reverse;
   }
-  .el_main{
+
+  .el_main {
     padding: 0;
   }
 

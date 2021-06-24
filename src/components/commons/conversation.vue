@@ -2,11 +2,10 @@
   <div class="conversation">
     <div class="msg" v-if="user != null">
       <div class="main">
-
         <div class="topTop">
           <el-button type="primary" class="backBtn" @click.native="conversationBack()">返回</el-button>
           <span v-if="user.identity === 'teacher'">{{ messageSide.student_name }}</span>
-          <span v-else>{{ messageSide.teacher_name }}</span>
+          <span v-else v-html="showName(messageSide.teacher_name)"></span>
         </div>
         <div class="topBox" ref="content">
           <ul class="list">
@@ -14,13 +13,13 @@
             <li v-for="item in list" :class="item.message_side == user.user_no ? 'teacher_right' : 'student_left'">
               <!--    头像-->
               <div class="icon">
-                <i v-if="iconPath == null" class="el-icon-user user"></i>
-                <img v-else :src="userIconPath + iconPath" alt=""/>
+                <i v-if="item.userPath == null" class="el-icon-user user"></i>
+                <img v-else :src="userIconPath + item.userPath" alt=""/>
               </div>
               <!--  消息-->
               <div class="content">
                 <div class="title">
-                  <span class="name">{{ item.message_side == user.user_no ? '我' : item.messageUser.user_name}}</span>
+                  <span class="name">{{item.message_side == user.user_no ? user.user_name : item.messageUser.user_name}}</span>
                   <span class="time">{{item.create_time | calcCreatedTime}}</span>
                 </div>
                 <p>{{ item.content }}</p>
@@ -76,27 +75,30 @@
         this.requestMessage()
       }
     },
+    computed: {
+      showName() {
+        return name => {
+          return name + "<span style='font-size: 14px; margin-left: 2px;'>(指导老师)</span>"
+        }
+      }
+    },
     mounted() {
       // 创建滚动对象
       this.content = this.$refs.content
     },
     filters: {
-      // 计算时间
+      // 时间过滤
       calcCreatedTime(createdTime) {
         const created = new Date(createdTime)
         const year = created.getFullYear()
-        const month = created.getMonth() + 1 < 10 ? '0' + created.getMonth() + 1 : created.getMonth() + 1
+        const month = created.getMonth() + 1 < 10 ? '0' + (created.getMonth() + 1) : created.getMonth() + 1
         const day = created.getDate() < 10 ? '0' + created.getDate() : created.getDate()
         const hour = created.getHours() < 10 ? '0' + created.getHours() : created.getHours()
         const minute = created.getMinutes() < 10 ? '0' + created.getMinutes() : created.getMinutes()
         // 获取现在时间
         const now = new Date()
         if(now.getFullYear() === year) {
-          if(now.getDate() === day) {
-            return hour + ":" + minute
-          } else {
-            return month + '月' + day + '日 ' + hour + ':' + minute
-          }
+          return month + '月' + day + '日 ' + hour + ':' + minute
         } else {
           return year + '年' + month + '月' + day + '日 ' + hour + ':' + minute
         }
@@ -128,6 +130,7 @@
             studentId: studentId
           }
         }).then(res => {
+          console.log(res)
           if(this.list == null) {
             setTimeout(() => {
               this.content.scrollTop = this.content.scrollHeight
@@ -329,9 +332,14 @@
     float: left;
   }
 
-  .list li .icon{
+  .list li .icon i{
     padding: 8px 10px;
     background-color: #9fa8da;
+  }
+
+  .list li .icon img {
+    width: 30px;
+    height: 30px;
   }
 
   .list li.teacher_right .icon {
@@ -360,7 +368,7 @@
   }
 
   .list li .content .title .time{
-    padding: 1px 8px;
+    padding: 2px 8px;
     background: rgb(218, 218, 218);
     color: white;
   }
@@ -389,5 +397,8 @@
     margin-top: 5px;
     word-break: break-word;
     text-align: left;
+    width: fit-content;
+    display: inline-block;
+    border-radius: 3px;
   }
 </style>

@@ -66,6 +66,9 @@
 </template>
 
 <script>
+
+  import {request} from "../../network/request"
+
   export default {
     name: "teacherHome",
     data() {
@@ -80,8 +83,9 @@
       };
     },
     created() {
-      if(this.$store.getters.user) {
-        this.user = this.$store.getters.user
+      const user = this.$store.getters.user
+      if(user != null) {
+        this.user = user
         this.defaultPath = this.$route.path
         if(this.user.userIcon !== null && this.iconPath == null) {
           this.iconPath = this.user.userIcon
@@ -107,6 +111,20 @@
           type: "success",
         })
         this.$router.replace("/")
+      },
+      getUser() {
+        request({
+          url: 'user/get',
+          params: {
+            userId: this.user.user_no
+          }
+        }).then(res => {
+          if (res.state !== -1) {
+            this.user = res.data
+            // 更新vuex的用户对象
+            this.$store.dispatch('updateUser', this.user)
+          }
+        })
       }
     },
     watch: {
@@ -117,6 +135,8 @@
         }
         // 如果用户对象不等于空
         if(this.user.userIcon !== null) {
+          // 获取最新用户
+          this.getUser()
           if(!this.iconPathState) {
             this.iconPath += this.user.userIcon
             this.iconPathState = true // 标志已用icon

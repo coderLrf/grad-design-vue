@@ -116,8 +116,6 @@
             // 更新vuex的用户对象
             this.$store.dispatch('updateUser', this.user)
           }
-        }).catch(err => {
-          console.log(err)
         })
       },
       exit() {
@@ -140,6 +138,8 @@
         }
         // 如果用户对象不等于空
         if (this.user.userIcon !== null) {
+          // 获取最新用户
+          this.getUser()
           if (!this.iconPathState) {
             this.iconPath += this.user.userIcon
             this.iconPathState = true // 标志已用icon

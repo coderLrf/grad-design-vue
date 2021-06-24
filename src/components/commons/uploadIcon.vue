@@ -30,7 +30,7 @@
     },
     created() {
       this.user = this.$store.getters.user
-      this.defaultUploadPath += this.user.teacher_no
+      this.defaultUploadPath += this.user.user_no
       if(this.user.userIcon !== null) {
         this.userIcon = this.user.userIcon
       }
@@ -59,7 +59,6 @@
 </script>
 
 <style scoped>
-
   .a {
     text-align: center;
     display: flex;

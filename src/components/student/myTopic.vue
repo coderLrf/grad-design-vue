@@ -5,11 +5,18 @@
     <div v-else>
       <div v-if="topic !== null">
         <h2>"{{ topic.title_name }}"</h2>
-        <h6 class="teacher" @click="communicate()">
+        <h6 class="teacher" @click="communicate()" title="快来与指导老师沟通吧" style="cursor: pointer">
           <span>指导老师：</span>
-          <el-tag  style="cursor: pointer" effect="dark">{{topic.teacher_name}}</el-tag>
+          <el-tag effect="dark">{{topic.teacher_name}}</el-tag>
         </h6>
         <el-button type="primary" class="download" @click.native="download">任务书下载</el-button>
+        <el-upload :action="defaultUploadPath"
+                   class="commitFile"
+                   name="fileUpload"
+                   :show-file-list="false"
+                   :on-success="uploadSuccess">
+          <el-button type="primary" class="commitFile">提交作品</el-button>
+        </el-upload>
       </div>
       <div v-else>
         <h2>还未存在定选课题，快去预选课题吧~</h2>
@@ -30,7 +37,8 @@
         topic: null,
         boo: false,
         arr: [],
-        teacherId: null
+        teacherId: null,
+        defaultUploadPath: 'http://localhost:9527/api/student/uploadFile/', // 默认上传文件地址
       }
     },
     components: {
@@ -53,12 +61,19 @@
     },
     created() {
       this.user = this.$store.getters.user
+      this.defaultUploadPath += this.user.student_no
       this.getAlreadySelectTopic()
-      this.boo = JSON.parse(sessionStorage.getItem('communicateBoo'))
+      this.boo = JSON.parse(sessionStorage.getItem('conversationBoo'))
       //再请求一边
       this.requestMessage()
     },
     methods: {
+      // 成功提交作品
+      uploadSuccess(res) {
+        if(res.state === 1) {
+          this.$message.success('成功提交作品.')
+        }
+      },
       // 获取留言记录
       requestMessage() {
         //在sessionStorage中拿出教师id
@@ -73,7 +88,6 @@
           this.arr = res.data
         })
       },
-
       //子组件传递false
       judge(value) {
         this.boo = value
@@ -82,7 +96,7 @@
       communicate() {
         this.boo = true
         sessionStorage.setItem('tea', JSON.stringify(this.topic))
-        sessionStorage.setItem('communicateBoo', JSON.stringify(true));
+        sessionStorage.setItem('conversationBoo', JSON.stringify(true));
       },
       // 下载任务书
       download() {
@@ -114,7 +128,6 @@
           if (res.state !== -1) {
             // 存在任务书，下载
             window.open(res.data.filePath)
-            // console.log(res)
           } else {
             this.$message.warning(res.message)
           }
@@ -130,6 +143,11 @@
 
   .teacher {
     margin: 20px 0;
+  }
+
+  .commitFile {
+    display: inline-block;
+    margin-left: 12px;
   }
 
 </style>

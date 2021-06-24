@@ -30,8 +30,8 @@
       </el-table-column>
       <el-table-column label="操作" fixed="right" align="center">
         <template slot-scope="scope">
-          <el-button size="mini" type="primary" @click="bookStudent(scope.row)">查看
-          </el-button>
+          <el-button size="mini" type="primary" @click="bookStudent(scope.row)">沟通</el-button>
+          <el-button size="mini" type="info" @click="bookFile(scope.row)">下载作品</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -97,6 +97,26 @@
         sessionStorage.setItem('stu',JSON.stringify(row))
         this.boo = true
         sessionStorage.setItem('conversationBoo',JSON.stringify(true));
+      },
+      // 查看该学生提交的作品
+      bookFile(row) {
+        const studentId = row.student_no
+        request({
+          url: 'teacher/get/file',
+          params: {
+            studentId
+          }
+        }).then(res => {
+          if(res.state === 1) {
+            // 作品获取成功...
+            // 存在任务书，下载
+            window.open(res.data.filePath)
+          } else {
+            this.$message.warning(res.message)
+          }
+        }).catch(err => {
+          console.log(err)
+        })
       }
     }
   }

@@ -66,8 +66,27 @@
       this.boo = JSON.parse(sessionStorage.getItem('conversationBoo'))
       //再请求一边
       this.requestMessage()
+      if(this.user != null) {
+        // 获取最新用户
+        this.getUser()
+      }
     },
     methods: {
+      // 获取最新用户
+      getUser() {
+        request({
+          url: 'user/get',
+          params: {
+            userId: this.user.user_no
+          }
+        }).then(res => {
+          if (res.state !== -1) {
+            this.user = res.data
+            // 更新vuex的用户对象
+            this.$store.dispatch('updateUser', this.user)
+          }
+        })
+      },
       // 成功提交作品
       uploadSuccess(res) {
         if(res.state === 1) {
@@ -125,6 +144,7 @@
             topicId: this.user.topic_no
           }
         }).then(res => {
+          console.log(this.user)
           if (res.state !== -1) {
             // 存在任务书，下载
             window.open(res.data.filePath)

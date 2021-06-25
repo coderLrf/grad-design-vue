@@ -10,7 +10,8 @@
         <div class="topBox" ref="content">
           <ul class="list">
             <!--          收到消息-->
-            <li v-for="item in list" :class="item.message_side == user.user_no ? 'teacher_right' : 'student_left'">
+            <li v-for="item in list" v-if="item.flag === 1"
+                :class="item.message_side == user.user_no ? 'teacher_right' : 'student_left'">
               <!--    头像-->
               <div class="icon">
                 <i v-if="item.userPath == null" class="el-icon-user user"></i>
@@ -24,6 +25,9 @@
                 </div>
                 <p>{{ item.content }}</p>
               </div>
+            </li>
+            <li v-else class="hidden">
+              <p>此条信息已被管理员屏蔽<i class="el-icon-warning"></i></p>
             </li>
 
           </ul>
@@ -321,6 +325,26 @@
     padding: 5px 0;
     line-height: 18px;
     max-width: 50%;
+  }
+
+  .list li.hidden {
+    max-width: 100%;
+    display: block;
+  }
+
+  .list li.hidden p {
+    display: inline-block;
+    width: content-box;
+    margin: 0;
+    padding: 5px;
+    border-radius: 6px;
+    background-color: #9fa8da;
+    font-size: 12px;
+  }
+
+  .list li.hidden p i {
+    margin: 0 3px;
+    color: #8e6262;
   }
 
   .list li.teacher_right {

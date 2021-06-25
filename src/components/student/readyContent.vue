@@ -37,7 +37,7 @@
 </template>
 
 <script>
-  import {request} from "../../network/request";
+  import {request} from "../../network/request"
 
   export default {
     name: "readContent",
@@ -63,20 +63,12 @@
             studentId: this.user.student_no,
           },
         }).then((res) => {
-          // console.log(res)
           if ((res.data.length > 0)) {
-            this.tableData = res.data;
-          }else{
-            this.$message({
-              message: res.message,
-              type: 'success',
-              duration: 2000,
-            })
+            this.tableData = res.data
           }
         })
       },
       handleDelete(index, row, id) {
-        // var stu = this.$store.state.studentId;
         request({
           url: "student/back",
           method: "post",
@@ -85,7 +77,6 @@
             studentId: this.user.student_no
           },
         }).then((res) => {
-          // console.log(res)
           if (res.state == 1) {
             this.tableData.splice(index, 1);
             this.$message({
